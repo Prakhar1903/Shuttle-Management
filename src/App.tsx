@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
@@ -30,7 +30,7 @@ const IndexRoute = () => {
  */
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <UserProvider>
         <BookingProvider>
           <DriverProvider>
@@ -103,7 +103,7 @@ function App() {
           </DriverProvider>
         </BookingProvider>
       </UserProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
