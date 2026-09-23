@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { LogIn, LogOut, Coffee } from 'lucide-react';
+import { Coffee } from 'lucide-react';
 import type { Driver } from '../../types';
 import { useDrivers } from '../../context/DriverContext';
 import toast from 'react-hot-toast';
@@ -81,36 +81,37 @@ export const DriverActionMenu: React.FC<DriverActionMenuProps> = ({
     onClose();
   };
 
-  // Position logic (simplified, assuming relative container)
+  // Position logic matching reference screenshot
   return (
     <div 
       ref={menuRef}
-      className="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
+      className="absolute left-6 top-8 w-52 bg-white rounded-2xl shadow-2xl p-2 z-50 border border-slate-100/90 text-sm font-medium text-slate-800 animate-in fade-in zoom-in-95 duration-100 select-none"
     >
       <button
+        type="button"
         onClick={() => handleAction('START_DUTY')}
-        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+        className="w-full text-left px-3.5 py-2.5 hover:bg-slate-50 flex items-center gap-3 transition-colors cursor-pointer text-slate-800 rounded-xl"
       >
-        <LogIn size={16} className="text-blue-500" />
-        Start Duty
+        <span className="text-slate-600 font-bold text-base">→</span>
+        <span>Start Duty</span>
       </button>
       
       <button
+        type="button"
         onClick={() => handleAction('END_DUTY')}
-        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+        className="w-full text-left px-3.5 py-2.5 bg-[#f0f4fa] hover:bg-[#e6edf8] flex items-center gap-3 transition-colors cursor-pointer text-slate-900 rounded-xl font-medium"
       >
-        <LogOut size={16} className="text-blue-500" />
-        End Duty
+        <span className="text-slate-700 font-bold text-base">↳</span>
+        <span>End Duty</span>
       </button>
       
-      <div className="h-px bg-gray-200 my-1"></div>
-      
       <button
+        type="button"
         onClick={() => handleAction('ADD_BREAK')}
-        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+        className="w-full text-left px-3.5 py-2.5 hover:bg-slate-50 flex items-center gap-3 transition-colors cursor-pointer text-slate-800 rounded-xl"
       >
-        <Coffee size={16} className="text-purple-500" />
-        Add Break
+        <Coffee size={16} className="text-slate-700" />
+        <span>Add Break</span>
       </button>
     </div>
   );

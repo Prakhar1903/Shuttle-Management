@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Coffee, Bus, LogIn, LogOut } from 'lucide-react';
+import { MapPin, Coffee, Bus } from 'lucide-react';
 import type { ScheduleEvent } from '../../types';
 
 interface TimelineSegmentProps {
@@ -18,91 +18,73 @@ export const TimelineSegment: React.FC<TimelineSegmentProps> = ({ event, style }
     switch (event.type) {
       case 'duty-start':
         return (
-          <div className="h-8 px-2 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/90 flex items-center gap-1 text-[11px] font-semibold shadow-2xs">
-            <LogIn size={12} className="text-emerald-600" />
-            <span>→9</span>
+          <div className="h-8 px-2 rounded-l-md bg-[#e6f4ea] text-[#137333] border border-[#a3e635]/50 flex items-center justify-center gap-0.5 font-bold text-xs shadow-2xs">
+            <span className="text-sm font-extrabold">→</span>
+            <span className="text-[10px]">9</span>
           </div>
         );
 
       case 'duty-end':
         return (
-          <div className="h-8 px-2 rounded-md bg-rose-50 text-rose-800 border border-rose-200/90 flex items-center gap-1 text-[11px] font-semibold shadow-2xs">
-            <span>9←</span>
-            <LogOut size={12} className="text-rose-600" />
+          <div className="h-8 px-2 rounded-r-md bg-[#fde8e8] text-[#d9384e] border border-[#fca5a5]/50 flex items-center justify-center gap-0.5 font-bold text-xs shadow-2xs">
+            <span className="text-[10px]">9</span>
+            <span className="text-sm font-extrabold">↳</span>
           </div>
         );
 
       case 'break':
         return (
-          <div className="h-8 w-full px-2.5 rounded-md bg-amber-100/90 text-amber-900 border border-amber-300 flex items-center justify-center gap-1.5 text-xs font-medium shadow-2xs">
-            <Coffee size={13} className="text-amber-800" />
-            <span className="text-[11px] font-semibold">Break</span>
+          <div className="h-8 w-full px-2 rounded-sm bg-[#fde047] text-[#713f12] border border-[#eab308]/60 flex items-center justify-center gap-1 shadow-2xs">
+            <Coffee size={13} className="text-[#713f12] fill-[#713f12]" />
           </div>
         );
 
       case 'vehicle-change':
         return (
-          <div className="h-8 w-full px-2 rounded-md bg-teal-50 text-teal-800 border border-teal-200/90 flex items-center justify-center gap-1 text-xs shadow-2xs font-medium">
-            <Bus size={13} className="text-teal-600" />
-            <span className="text-[10px] font-semibold">Vehicle</span>
+          <div className="h-8 w-full px-2 rounded-sm bg-[#ccfbf1] text-[#0f766e] border border-[#5eead4]/60 flex items-center justify-center shadow-2xs">
+            <Bus size={13} className="text-[#0f766e]" />
           </div>
         );
 
       case 'pickup':
       case 'drop':
         return (
-          <div className="h-8 w-full px-2 rounded-md bg-blue-50 text-blue-800 border border-blue-200 flex items-center justify-center gap-1 text-xs shadow-2xs hover:bg-blue-100/70 transition-colors">
-            <MapPin size={12} className={event.type === 'drop' ? 'text-blue-700 fill-blue-700' : 'text-blue-600'} />
-            {(event.pickupCount || event.dropCount) ? (
-              <span className="text-[11px] font-semibold text-blue-900">
-                {event.pickupCount ? `${event.pickupCount}P` : `${event.dropCount}D`}
-              </span>
-            ) : null}
+          <div className="h-8 w-full px-1.5 rounded-sm bg-[#dbeafe] text-[#1e40af] border border-[#93c5fd]/60 flex items-center justify-center gap-1 shadow-2xs hover:bg-[#bfdbfe] transition-colors">
+            <MapPin size={12} className="text-[#1e3a8a] fill-[#1e3a8a]" />
           </div>
         );
 
       case 'empty-leg':
         return (
-          <div className="h-8 w-full px-2 rounded-md bg-slate-50 border border-dashed border-slate-300 flex items-center justify-between text-[10px] font-medium text-slate-500">
+          <div className="h-8 w-full px-1.5 rounded-sm bg-[#fce7f3] text-[#9d174d] border border-[#f472b6]/50 flex items-center justify-between text-[10px] font-bold">
             <span>-9</span>
+            <MapPin size={10} className="text-[#9d174d] fill-[#9d174d]" />
             <span>-9</span>
           </div>
         );
 
       default:
         return (
-          <div className="h-8 w-full rounded-md bg-slate-100 border border-slate-200" />
+          <div className="h-8 w-full rounded-sm bg-slate-100 border border-slate-200" />
         );
     }
   };
 
-  const getTooltipLabel = () => {
-    if (event.pickupCount || event.dropCount) {
-      const parts = [];
-      if (event.pickupCount) parts.push(`${event.pickupCount} Pickup`);
-      if (event.dropCount) parts.push(`${event.dropCount} Drop`);
-      return parts.join(', ');
-    }
-    return event.label || event.type;
-  };
-
   return (
     <div 
-      className="absolute top-4 z-10 transition-transform duration-150 hover:scale-[1.02] cursor-pointer"
+      className="absolute top-[18px] z-10 transition-transform duration-100 hover:scale-[1.02] cursor-pointer"
       style={style}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
       {renderContent()}
       
-      {/* Tooltip on hover */}
+      {/* Tooltip on hover matching reference screenshot */}
       {showTooltip && (
-        <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs py-1.5 px-3 rounded-md shadow-lg whitespace-nowrap z-50 pointer-events-none flex flex-col items-center border border-slate-800">
-          <span className="font-semibold">{getTooltipLabel()}</span>
-          <span className="text-[10px] text-slate-300 font-mono">
-            {event.startTime} - {event.endTime}
-          </span>
-          <div className="w-2 h-2 bg-slate-900 rotate-45 absolute -bottom-1 border-r border-b border-slate-800"></div>
+        <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-[#111827] text-white text-xs font-semibold py-1.5 px-3 rounded-lg shadow-2xl z-50 pointer-events-none flex flex-col items-center leading-tight whitespace-nowrap">
+          <div>{event.pickupCount || 2} Pickup</div>
+          <div>{event.dropCount || 3} Drop</div>
+          <div className="w-2.5 h-2.5 bg-[#111827] rotate-45 absolute -bottom-1"></div>
         </div>
       )}
     </div>

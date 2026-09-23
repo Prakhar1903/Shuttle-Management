@@ -9,9 +9,10 @@ interface DriverListProps {
   selectedDriverId?: string;
 }
 
+
 /**
- * Clean Driver List Panel
- * Fixed width, 64px row heights aligned precisely with the timeline.
+ * Clean Enterprise Driver List Panel
+ * Fixed width, 68px row heights aligned precisely with the timeline tracks.
  */
 export const DriverList: React.FC<DriverListProps> = ({ 
   drivers, 
@@ -32,46 +33,44 @@ export const DriverList: React.FC<DriverListProps> = ({
     }
   };
 
+
   return (
     <div className="flex flex-col divide-y divide-slate-100">
       {drivers.map(driver => (
         <div 
           key={driver.id}
           onClick={() => onSelectDriver(driver)}
-          className={`h-16 flex items-center justify-between px-4 transition-colors cursor-pointer ${
+          className={`h-[71px] flex items-center justify-between px-7 transition-colors cursor-pointer select-none relative ${
             selectedDriverId === driver.id 
-              ? 'bg-blue-50/70' 
-              : 'hover:bg-slate-50/70'
+              ? 'bg-blue-50/60' 
+              : 'hover:bg-slate-50/60'
           }`}
         >
-          {/* Driver Info */}
-          <div className="min-w-0 pr-3">
-            <div className="font-semibold text-slate-900 text-sm truncate leading-tight">
+          {/* Driver Name & Status Badge */}
+          <div className="min-w-0 pr-2">
+            <div className="font-medium text-[#303746] text-[16px] truncate leading-tight">
               {driver.name}
             </div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className={`inline-flex items-center gap-1 text-xs font-medium ${
+            <div className="mt-1.5">
+              <span className={`inline-flex items-center text-[12px] font-medium px-2.5 py-0.5 rounded-md ${
                 driver.status === 'Online'
-                  ? 'text-emerald-700'
-                  : 'text-slate-400'
+                  ? 'bg-[#e6f4ea] text-[#137333]'
+                  : 'bg-[#fce8e6] text-[#c5221f]'
               }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${
-                  driver.status === 'Online' ? 'bg-emerald-500' : 'bg-slate-300'
-                }`}></span>
                 {driver.status}
               </span>
             </div>
           </div>
           
-          {/* Action Menu Trigger */}
-          <div className="relative shrink-0">
+          {/* Action Menu Trigger (⋮) */}
+          <div className="relative shrink-0 -mr-4">
             <button 
               type="button"
               onClick={(e) => handleMenuClick(e, driver.id)}
-              className="p-1.5 text-slate-400 hover:text-slate-700 rounded-md hover:bg-slate-100 transition-colors focus:outline-none"
+              className="p-1 text-[#3f4652] bg-[#e7eaf2] hover:bg-[#dbe2ee] rounded-md transition-colors focus:outline-none cursor-pointer shadow-2xs"
               title="Driver Shift Options"
             >
-              <MoreVertical size={16} />
+              <MoreVertical size={15} />
             </button>
             
             {menuOpenId === driver.id && (

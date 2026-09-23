@@ -11,17 +11,48 @@
 }
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: #f8fafc; /* Slate-50: calm, clean canvas */
-  color: #0f172a;            /* Slate-900: high contrast, readable */
+  background-color: #f3f4f8; /* Calm enterprise light-gray canvas matching reference */
+  color: #0f172a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Driver schedule reference layout: explicit measurements keep the desktop
+   composition stable even when utility generation changes. */
+.app-main {
+  width: 100%;
+  padding: 3px;
+}
+
+@media (max-width: 640px) {
+  .app-sidebar {
+    width: 76px;
+  }
+}
+
+.scheduler-card {
+  padding: 18px 18px 16px;
+}
+
+.scheduler-head {
+  height: 40px;
+}
+
+.scheduler-title {
+  display: block;
+  color: #171923;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.scheduler-grid {
+  margin-top: 14px;
 }
 
 /* ==========================================================================

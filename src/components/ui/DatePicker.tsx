@@ -31,9 +31,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   return (
     <div className={`relative inline-flex items-center ${className}`}>
-      <label className="h-9 flex items-center gap-2 px-3 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 font-medium hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer shadow-2xs select-none">
-        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+      <label className="w-[168px] h-[39px] flex items-center justify-between px-3 bg-white border border-[#dedfe3] rounded-[8px] text-[17px] text-[#303746] font-medium hover:border-slate-300 transition-colors cursor-pointer shadow-sm select-none">
         <span className="whitespace-nowrap">{formatDisplay(value)}</span>
+        <Calendar className="w-4 h-4 text-[#687382]" />
         <input
           type="date"
           value={value}

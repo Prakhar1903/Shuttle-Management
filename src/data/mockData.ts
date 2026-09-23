@@ -16,19 +16,23 @@ export const mockDrivers: Driver[] = [
     rating: 4.8,
     vehicleId: 'v1',
     schedule: [
-      { id: 'se1', type: 'duty-start', startTime: '06:00', endTime: '06:00', label: 'Duty Start' },
-      { id: 'se2', type: 'pickup', startTime: '07:00', endTime: '07:15', label: 'Pickup', pickupCount: 3 },
-      { id: 'se3', type: 'drop', startTime: '07:30', endTime: '07:45', label: 'Drop', dropCount: 2 },
-      { id: 'se4', type: 'pickup', startTime: '08:00', endTime: '08:15', label: 'Pickup', pickupCount: 4 },
-      { id: 'se5', type: 'drop', startTime: '08:30', endTime: '08:45', label: 'Drop', dropCount: 3 },
-      { id: 'se6', type: 'pickup', startTime: '09:00', endTime: '09:15', label: 'Pickup', pickupCount: 2 },
-      { id: 'se7', type: 'drop', startTime: '09:30', endTime: '09:45', label: 'Drop', dropCount: 4 },
-      { id: 'se8', type: 'break', startTime: '10:00', endTime: '10:30', label: 'Break' },
-      { id: 'se9', type: 'pickup', startTime: '11:00', endTime: '11:15', label: 'Pickup', pickupCount: 5 },
-      { id: 'se10', type: 'drop', startTime: '11:30', endTime: '11:45', label: 'Drop', dropCount: 2 },
-      { id: 'se11', type: 'pickup', startTime: '12:00', endTime: '12:15', label: 'Pickup', pickupCount: 1 },
-      { id: 'se12', type: 'vehicle-change', startTime: '12:30', endTime: '12:40', label: 'Vehicle Change' },
-      { id: 'se13', type: 'duty-end', startTime: '16:00', endTime: '16:00', label: 'Duty End' }
+      { id: 'se1', type: 'duty-start', startTime: '06:00', endTime: '06:20', label: 'Duty Start' },
+      { id: 'se2', type: 'empty-leg', startTime: '06:20', endTime: '06:45', label: 'Empty Leg' },
+      { id: 'se3', type: 'pickup', startTime: '06:45', endTime: '07:15', label: 'Pickup', pickupCount: 3 },
+      { id: 'se4', type: 'break', startTime: '07:15', endTime: '08:00', label: 'Break' },
+      { id: 'se5', type: 'empty-leg', startTime: '08:00', endTime: '08:20', label: 'Empty Leg' },
+      { id: 'se6', type: 'pickup', startTime: '08:20', endTime: '09:15', label: 'Pickup', pickupCount: 4 },
+      { id: 'se7', type: 'pickup', startTime: '09:15', endTime: '09:35', label: 'Pickup', pickupCount: 2 },
+      { id: 'se8', type: 'drop', startTime: '09:35', endTime: '09:50', label: 'Drop', dropCount: 3 },
+      { id: 'se9', type: 'empty-leg', startTime: '09:50', endTime: '10:05', label: 'Empty Leg' },
+      { id: 'se10', type: 'vehicle-change', startTime: '11:30', endTime: '11:50', label: 'Vehicle Change' },
+      { id: 'se11', type: 'empty-leg', startTime: '11:50', endTime: '12:05', label: 'Empty Leg' },
+      { id: 'se12', type: 'empty-leg', startTime: '12:05', endTime: '12:20', label: 'Empty Leg' },
+      { id: 'se13', type: 'pickup', startTime: '12:20', endTime: '13:45', label: 'Pickup', pickupCount: 5 },
+      { id: 'se14', type: 'break', startTime: '13:45', endTime: '15:15', label: 'Lunch Break' },
+      { id: 'se15', type: 'pickup', startTime: '15:15', endTime: '15:35', label: 'Pickup', pickupCount: 2 },
+      { id: 'se16', type: 'empty-leg', startTime: '15:35', endTime: '15:50', label: 'Empty Leg' },
+      { id: 'se17', type: 'duty-end', startTime: '15:50', endTime: '16:05', label: 'Duty End' }
     ]
   },
   {
@@ -39,11 +43,15 @@ export const mockDrivers: Driver[] = [
     rating: 4.5,
     vehicleId: 'v2',
     schedule: [
-      { id: 'be1', type: 'duty-start', startTime: '07:00', endTime: '07:00', label: 'Duty Start' },
-      { id: 'be2', type: 'pickup', startTime: '08:00', endTime: '08:15', label: 'Pickup', pickupCount: 2 },
-      { id: 'be3', type: 'drop', startTime: '08:45', endTime: '09:00', label: 'Drop', dropCount: 2 },
-      { id: 'be4', type: 'break', startTime: '11:30', endTime: '12:00', label: 'Lunch Break' },
-      { id: 'be5', type: 'duty-end', startTime: '15:00', endTime: '15:00', label: 'Duty End' }
+      { id: 'be1', type: 'break', startTime: '08:30', endTime: '08:45', label: 'Prep' },
+      { id: 'be2', type: 'pickup', startTime: '08:45', endTime: '10:00', label: 'Pickup', pickupCount: 2 },
+      { id: 'be3', type: 'pickup', startTime: '10:00', endTime: '11:15', label: 'Pickup', pickupCount: 3 },
+      { id: 'be4', type: 'pickup', startTime: '11:15', endTime: '11:45', label: 'Pickup', pickupCount: 2, dropCount: 3 },
+      { id: 'be5', type: 'pickup', startTime: '11:45', endTime: '12:05', label: 'Pickup', pickupCount: 1 },
+      { id: 'be6', type: 'drop', startTime: '12:05', endTime: '12:25', label: 'Drop', dropCount: 2 },
+      { id: 'be7', type: 'empty-leg', startTime: '12:25', endTime: '12:45', label: 'Empty Leg' },
+      { id: 'be8', type: 'break', startTime: '16:30', endTime: '20:30', label: 'Standby' },
+      { id: 'be9', type: 'duty-end', startTime: '20:30', endTime: '21:00', label: 'Duty End' }
     ]
   },
   {
@@ -54,10 +62,12 @@ export const mockDrivers: Driver[] = [
     rating: 4.2,
     vehicleId: 'v3',
     schedule: [
-      { id: 'je1', type: 'duty-start', startTime: '06:30', endTime: '06:30', label: 'Duty Start' },
-      { id: 'je2', type: 'pickup', startTime: '07:30', endTime: '07:45', label: 'Pickup', pickupCount: 5 },
-      { id: 'je3', type: 'drop', startTime: '08:30', endTime: '08:45', label: 'Drop', dropCount: 5 },
-      { id: 'je4', type: 'duty-end', startTime: '14:00', endTime: '14:00', label: 'Duty End' }
+      { id: 'je1', type: 'empty-leg', startTime: '08:30', endTime: '09:15', label: 'Empty Leg' },
+      { id: 'je2', type: 'pickup', startTime: '09:15', endTime: '10:45', label: 'Pickup', pickupCount: 5 },
+      { id: 'je3', type: 'break', startTime: '10:45', endTime: '11:30', label: 'Break' },
+      { id: 'je4', type: 'pickup', startTime: '11:30', endTime: '12:30', label: 'Pickup', pickupCount: 3 },
+      { id: 'je5', type: 'empty-leg', startTime: '12:30', endTime: '13:15', label: 'Empty Leg' },
+      { id: 'je6', type: 'duty-end', startTime: '13:15', endTime: '13:35', label: 'Duty End' }
     ]
   },
   {
@@ -102,18 +112,31 @@ const generateRandomBookings = (): Booking[] => {
     let to = locations[Math.floor(Math.random() * locations.length)];
     while (to === from) to = locations[Math.floor(Math.random() * locations.length)];
     
+    const pickupHour = Math.floor(Math.random() * 11 + 7);
+    const pickupMin = Math.floor(Math.random() * 60);
+    const tripDuration = Math.floor(Math.random() * 20 + 15);
+    const dropMinutesTotal = pickupHour * 60 + pickupMin + tripDuration;
+    const dropHour = Math.floor(dropMinutesTotal / 60);
+    const dropMin = dropMinutesTotal % 60;
+
+    const requestedPickupTime = `${pickupHour.toString().padStart(2, '0')}:${pickupMin.toString().padStart(2, '0')}`;
+    const plannedDrop = `${dropHour.toString().padStart(2, '0')}:${dropMin.toString().padStart(2, '0')}`;
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const hasPickup = ['On Going', 'Completed', 'Dropped'].includes(status);
+    const hasDrop = ['Completed', 'Dropped'].includes(status);
+
     randomBookings.push({
       id: Math.floor(100000 + Math.random() * 900000).toString(),
       employeeName: names[Math.floor(Math.random() * names.length)],
       employeeId: `EMP${Math.floor(1000 + Math.random() * 9000)}`,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
+      status,
       from,
       to,
       vehicle: vehicles[Math.floor(Math.random() * vehicles.length)],
-      requestedPickupTime: `${Math.floor(Math.random() * 12 + 6)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-      pickupTime: Math.random() > 0.5 ? `${Math.floor(Math.random() * 12 + 6)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}` : null,
-      plannedDrop: `${Math.floor(Math.random() * 12 + 6)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-      actualDrop: Math.random() > 0.5 ? `${Math.floor(Math.random() * 12 + 6)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}` : null,
+      requestedPickupTime,
+      pickupTime: hasPickup ? requestedPickupTime : null,
+      plannedDrop,
+      actualDrop: hasDrop ? plannedDrop : null,
       date: '2024-12-16'
     });
   }

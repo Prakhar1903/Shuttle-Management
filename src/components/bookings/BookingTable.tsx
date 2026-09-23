@@ -32,7 +32,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     <div className="w-full flex flex-col">
       {/* Scrollable Table Area */}
       <div className="overflow-x-auto min-w-full">
-        <table className="w-full text-left border-collapse min-w-[1140px]">
+        <table className="w-full text-left border-collapse min-w-[1020px]">
           {/* Table Header */}
           <thead className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider select-none">
             <tr>
@@ -46,7 +46,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
               <SortableHeader label="Pickup Time" sortKey="pickupTime" currentSort={sortConfig} onSort={requestSort} />
               <SortableHeader label="Planned Drop" sortKey="plannedDrop" currentSort={sortConfig} onSort={requestSort} />
               <SortableHeader label="Actual Drop" sortKey="actualDrop" currentSort={sortConfig} onSort={requestSort} />
-              <th className="px-4 py-3 text-right text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+              <th className="px-3.5 py-3 text-right text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                 Action
               </th>
             </tr>
@@ -60,61 +60,61 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                 className="hover:bg-slate-50/70 transition-colors"
               >
                 {/* Booking ID */}
-                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs font-semibold text-slate-700">
+                <td className="px-3.5 py-3 whitespace-nowrap text-xs font-medium text-slate-800">
                   {booking.id}
                 </td>
 
                 {/* Employee */}
-                <td className="px-4 py-3.5 whitespace-nowrap font-medium text-slate-900">
+                <td className="px-3.5 py-3 whitespace-nowrap text-xs font-medium text-slate-800">
                   {booking.employeeName}
                 </td>
 
                 {/* Status */}
-                <td className="px-4 py-3.5 whitespace-nowrap">
+                <td className="px-3.5 py-3 whitespace-nowrap">
                   <StatusBadge status={booking.status} />
                 </td>
 
-                {/* From */}
-                <td className="px-4 py-3.5 whitespace-nowrap text-slate-600">
+                {/* Route: From */}
+                <td className="px-3.5 py-3 whitespace-nowrap text-xs text-slate-700">
                   {booking.from}
                 </td>
 
-                {/* To */}
-                <td className="px-4 py-3.5 whitespace-nowrap text-slate-600">
+                {/* Route: To */}
+                <td className="px-3.5 py-3 whitespace-nowrap text-xs text-slate-700">
                   {booking.to}
                 </td>
 
                 {/* Vehicle */}
-                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-600">
-                  {booking.vehicle || '—'}
+                <td className="px-3.5 py-3 whitespace-nowrap text-xs text-slate-700 font-mono">
+                  {booking.vehicle || '-'}
                 </td>
 
                 {/* Requested Pickup */}
-                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-700 font-medium">
+                <td className="px-3.5 py-3 whitespace-nowrap text-xs text-slate-700 font-mono">
                   {booking.requestedPickupTime}
                 </td>
 
                 {/* Pickup Time */}
-                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-500">
-                  {booking.pickupTime || '—'}
+                <td className="px-3.5 py-3 whitespace-nowrap text-xs text-slate-500 font-mono">
+                  {booking.pickupTime || '-'}
                 </td>
 
                 {/* Planned Drop */}
-                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-500">
-                  {booking.plannedDrop || '—'}
+                <td className="px-3.5 py-3 whitespace-nowrap text-xs text-slate-700 font-mono">
+                  {booking.plannedDrop || '-'}
                 </td>
 
                 {/* Actual Drop */}
-                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-500">
-                  {booking.actualDrop || '—'}
+                <td className="px-3.5 py-3 whitespace-nowrap text-xs text-slate-700 font-mono">
+                  {booking.actualDrop || '-'}
                 </td>
 
-                {/* Action */}
-                <td className="px-4 py-3.5 whitespace-nowrap text-right">
+                {/* Action: Blue outline View button matching reference screenshot */}
+                <td className="px-3.5 py-3 whitespace-nowrap text-right">
                   <button
                     type="button"
                     onClick={() => dispatch({ type: 'SELECT_BOOKING', payload: booking })}
-                    className="px-3 py-1 text-xs font-medium rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 transition-colors shadow-2xs"
+                    className="px-4 py-1 text-xs font-semibold rounded-md border border-[#1a73e8] text-[#1a73e8] hover:bg-[#1a73e8]/5 transition-colors cursor-pointer"
                   >
                     View
                   </button>

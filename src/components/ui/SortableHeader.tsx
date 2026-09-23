@@ -27,7 +27,7 @@ export const SortableHeader: React.FC<SortableHeaderProps> = ({
 
   return (
     <th
-      className="px-5 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100/70 transition-colors group select-none whitespace-nowrap"
+      className="px-3.5 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100/70 transition-colors group select-none whitespace-nowrap"
       onClick={() => onSort(sortKey)}
     >
       <div className="flex items-center gap-1.5">

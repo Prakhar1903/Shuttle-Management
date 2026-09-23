@@ -1,11 +1,11 @@
 import React from 'react';
-import type { Driver } from '../../types';
-import { TimelineSegment } from './TimelineSegment';
+import type { Driver, ScheduleEvent } from '../../types';
+import { MapPin, Coffee, Bus } from 'lucide-react';
 import { 
   TIMELINE_HOURLY_SLOTS, 
-  TIMELINE_END_HOUR, 
   getTimelinePosition, 
-  getTimelineWidth 
+  getTimelineWidth,
+  timeToMinutes
 } from '../../utils/timeUtils';
 
 interface DriverTimelineProps {
@@ -14,81 +14,198 @@ interface DriverTimelineProps {
 
 /**
  * Enterprise Driver Availability Timeline
- * Pixel-aligned hourly timeline grid with subtle current-time vertical indicator.
+ * Contiguous flush shift ribbon containers with pixel-perfect hourly grid.
  */
 export const DriverTimeline: React.FC<DriverTimelineProps> = ({ drivers }) => {
-  // Current time position (12:30 for MoveInSync reference)
-  const currentTimePercentage = getTimelinePosition('12:30');
+  // Current time position (12:45 matching reference)
+  const currentTimePercentage = getTimelinePosition('12:45');
+
+  // Helper to cluster contiguous events into bounded shift containers
+  const getShiftClusters = (events: ScheduleEvent[]) => {
+    if (!events || events.length === 0) return [];
+    const clusters: { start: string; end: string; isStandby?: boolean; events: ScheduleEvent[] }[] = [];
+    let currentClusterEvents = [events[0]];
+    let currentStart = events[0].startTime;
+    let currentEnd = events[0].endTime;
+    let isCurrentStandby = events[0].label === 'Standby';
+
+    for (let i = 1; i < events.length; i++) {
+      const prev = events[i - 1];
+      const curr = events[i];
+      
+      const [prevH, prevM] = prev.endTime.split(':').map(Number);
+      const [currH, currM] = curr.startTime.split(':').map(Number);
+      const gapMinutes = (currH * 60 + currM) - (prevH * 60 + prevM);
+
+      if (gapMinutes > 35) {
+        clusters.push({ 
+          start: currentStart, 
+          end: currentEnd, 
+          isStandby: isCurrentStandby,
+          events: currentClusterEvents 
+        });
+        currentStart = curr.startTime;
+        currentEnd = curr.endTime;
+        isCurrentStandby = curr.label === 'Standby';
+        currentClusterEvents = [curr];
+      } else {
+        currentEnd = curr.endTime;
+        if (curr.label === 'Standby') isCurrentStandby = true;
+        currentClusterEvents.push(curr);
+      }
+    }
+    clusters.push({ 
+      start: currentStart, 
+      end: currentEnd, 
+      isStandby: isCurrentStandby,
+      events: currentClusterEvents 
+    });
+    return clusters;
+  };
+
+  const renderSegmentInsideShift = (event: ScheduleEvent, isStandby?: boolean) => {
+    switch (event.type) {
+      case 'duty-start':
+        return (
+          <div className="w-full h-full bg-[#e6f4ea] text-[#137333] border-r border-[#8b5cf6]/30 flex items-center justify-center font-bold text-xs select-none">
+            <span className="text-sm font-extrabold leading-none">→</span>
+            <span className="text-[10px] ml-0.5">9</span>
+          </div>
+        );
+
+      case 'duty-end':
+        return (
+          <div className="w-full h-full bg-[#fde8e8] text-[#d9384e] border-l border-[#8b5cf6]/30 flex items-center justify-center font-bold text-xs select-none">
+            <span className="text-[10px] mr-0.5">9</span>
+            <span className="text-sm font-extrabold leading-none">↳</span>
+          </div>
+        );
+
+      case 'break':
+        return (
+          <div className={`w-full h-full ${isStandby ? 'bg-transparent text-slate-400' : 'bg-[#fde047] text-[#713f12] border-r border-[#8b5cf6]/30'} flex items-center justify-center select-none`}>
+            <Coffee size={13} className={isStandby ? 'text-slate-400' : 'text-[#713f12] fill-[#713f12]'} />
+          </div>
+        );
+
+      case 'vehicle-change':
+        return (
+          <div className="w-full h-full bg-[#ccfbf1] text-[#0f766e] border-r border-[#8b5cf6]/30 flex items-center justify-center select-none">
+            <Bus size={13} className="text-[#0f766e]" />
+          </div>
+        );
+
+      case 'pickup':
+      case 'drop':
+        return (
+          <div className="w-full h-full bg-[#dbeafe] text-[#1e40af] border-r border-[#8b5cf6]/30 flex items-center justify-center hover:bg-[#bfdbfe] transition-colors relative group/pin select-none">
+            <MapPin size={12} className="text-[#1e3a8a] fill-[#1e3a8a]" />
+            {/* Tooltip on hover matching reference */}
+            <div className="opacity-0 group-hover/pin:opacity-100 transition-opacity duration-150 absolute -top-14 left-1/2 -translate-x-1/2 bg-[#111827] text-white text-xs font-semibold py-1.5 px-3 rounded-lg shadow-2xl z-50 pointer-events-none flex flex-col items-center leading-tight whitespace-nowrap">
+              <div>{event.pickupCount || 2} Pickup</div>
+              <div>{event.dropCount || 3} Drop</div>
+              <div className="w-2.5 h-2.5 bg-[#111827] rotate-45 absolute -bottom-1"></div>
+            </div>
+          </div>
+        );
+
+      case 'empty-leg':
+        return (
+          <div className="w-full h-full bg-[#fce7f3] text-[#9d174d] border-r border-[#8b5cf6]/30 flex items-center justify-between px-1 text-[10px] font-bold select-none">
+            <span>-9</span>
+            <MapPin size={9} className="text-[#9d174d] fill-[#9d174d]" />
+            <span>-9</span>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="w-full h-full bg-slate-100 border border-slate-200" />
+        );
+    }
+  };
 
   return (
-    <div className="min-w-[1240px] select-none">
-      {/* Timeline Hour Header */}
-      <div className="h-10 border-b border-slate-200 bg-slate-50/80 flex items-center text-xs font-semibold text-slate-500 sticky top-0 z-20">
-        {TIMELINE_HOURLY_SLOTS.map((hour) => (
-          <div 
-            key={hour} 
-            className="flex-1 flex items-center justify-start pl-2 border-r border-slate-200/70 h-full font-mono text-[11px]"
-          >
-            {hour.toString().padStart(2, '0')}:00
-          </div>
-        ))}
-        {/* Final hour mark at right edge */}
-        <div className="w-12 text-right pr-2 font-mono text-[11px] text-slate-400">
-          {TIMELINE_END_HOUR}:00
+    <div className="min-w-[1294px] select-none">
+      {/* Timeline Hour Header (h-11 matching Driver column) */}
+      <div className="h-[65px] border-b border-[#e0e2e6] bg-white sticky top-0 z-20 pt-[19px] px-9 pr-6">
+        <div className="h-[39px] flex items-center text-[14px] font-medium text-[#303746]">
+          {TIMELINE_HOURLY_SLOTS.map((hour) => (
+            <div key={hour} className="flex-1 flex items-center justify-start pl-1.5 border-r border-[#eceef2] h-full">
+              {hour}:00
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Grid Canvas */}
       <div className="relative">
         {/* Vertical Column Guides */}
-        <div className="absolute inset-0 flex pointer-events-none z-0">
+        <div className="absolute inset-y-0 left-9 right-6 flex pointer-events-none z-0">
           {TIMELINE_HOURLY_SLOTS.map((hour) => (
             <div 
               key={`grid-${hour}`} 
               className="flex-1 border-r border-slate-100 h-full"
             />
           ))}
-          <div className="w-12 h-full" />
         </div>
 
-        {/* Current Time Indicator (Vertical line at 12:30) */}
+        {/* Current Time Indicator (Vertical line at 12:45 with top circle pin) */}
         <div 
-          className="absolute top-0 bottom-0 w-[1.5px] bg-blue-500 z-20 pointer-events-none"
-          style={{ left: `${currentTimePercentage}%` }}
+          className="absolute top-0 bottom-0 w-[2px] bg-[#666d76] z-20 pointer-events-none"
+          style={{ left: `calc(36px + (100% - 60px) * ${currentTimePercentage / 100})` }}
         >
-          {/* Top Pin Header */}
-          <div className="absolute -top-2.5 -translate-x-[5px] w-3 h-3 rounded-full bg-blue-600 border-2 border-white shadow-xs"></div>
+          {/* Top Pin Header circle at timeline header edge */}
+          <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-[#475569] border border-white shadow-xs"></div>
         </div>
 
-        {/* Driver Rows */}
+        {/* Driver Rows (h-[68px] precisely matching DriverList) */}
         <div className="flex flex-col relative z-10">
-          {drivers.map((driver) => (
-            <div 
-              key={driver.id} 
-              className="h-16 border-b border-slate-100 relative flex items-center hover:bg-slate-50/40 transition-colors group"
-            >
-              {/* Subtle shift background track */}
-              <div className="absolute inset-x-2 h-9 top-3.5 bg-slate-50/70 rounded-md pointer-events-none border border-slate-200/40"></div>
+          {drivers.map((driver) => {
+            const shiftClusters = getShiftClusters(driver.schedule || []);
 
-              {/* Driver's Scheduled Events */}
-              {driver.schedule?.map((event, index) => {
-                const left = getTimelinePosition(event.startTime);
-                const width = Math.max(3.2, getTimelineWidth(event.startTime, event.endTime));
+            return (
+              <div 
+                key={driver.id} 
+              className="h-[71px] border-b border-[#edf0f3] relative flex items-center hover:bg-slate-50/20 transition-colors group"
+              >
+                {/* Contiguous Bounded Shift Containers */}
+                {shiftClusters.map((cluster, cIdx) => {
+                  const cLeft = getTimelinePosition(cluster.start);
+                  const cWidth = getTimelineWidth(cluster.start, cluster.end);
+                  const clusterTotalDuration = timeToMinutes(cluster.end) - timeToMinutes(cluster.start) || 1;
+                  const isStandby = cluster.isStandby || (cluster.start >= '16:00' && driver.status === 'Offline');
 
-                return (
-                  <TimelineSegment 
-                    key={`${driver.id}-event-${index}`} 
-                    event={event} 
-                    style={{ 
-                      left: `${left}%`, 
-                      width: `${width}%`,
-                      minWidth: event.type === 'duty-start' || event.type === 'duty-end' ? '40px' : '44px'
-                    }} 
-                  />
-                );
-              })}
-            </div>
-          ))}
+                  return (
+                    <div 
+                      key={`cluster-${driver.id}-${cIdx}`}
+                      className={`absolute h-12 top-[12px] rounded-md overflow-hidden flex z-10 ${
+                        isStandby
+                          ? 'border border-slate-200/90 bg-[#f0fdfa]/40 shadow-xs'
+                          : 'border border-[#8b5cf6]/60 bg-white shadow-2xs'
+                      }`}
+                      style={{ left: `calc(36px + (100% - 60px) * ${cLeft / 100})`, width: `calc((100% - 60px) * ${cWidth / 100})` }}
+                    >
+                      {cluster.events.map((event, eIdx) => {
+                        const evDuration = Math.max(12, (timeToMinutes(event.endTime) - timeToMinutes(event.startTime)));
+                        const evWidthPercent = (evDuration / clusterTotalDuration) * 100;
+
+                        return (
+                          <div 
+                            key={`${event.id}-${eIdx}`}
+                            className="h-full relative shrink-0 flex items-center justify-center cursor-pointer group/seg"
+                            style={{ width: `${evWidthPercent}%` }}
+                          >
+                            {renderSegmentInsideShift(event, isStandby)}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
 
           {drivers.length === 0 && (
             <div className="h-32 flex items-center justify-center text-sm text-slate-400">

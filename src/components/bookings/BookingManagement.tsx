@@ -5,7 +5,6 @@ import BookingDetailPanel from './BookingDetailPanel';
 import BookingForm from './BookingForm';
 import { SearchBar } from '../ui/SearchBar';
 import { DatePicker } from '../ui/DatePicker';
-import { Plus } from 'lucide-react';
 
 /**
  * Booking Management Section
@@ -30,45 +29,31 @@ export const BookingManagement: React.FC = () => {
   });
 
   return (
-    <section className="space-y-3">
-      {/* Section Header: Title on Left, Controls Aligned on Right */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight">Booking Management</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Monitor passenger transit requests, schedule assignments, and trip execution.
-          </p>
-        </div>
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 md:p-6 space-y-4">
+      {/* Card Header: Title on Left, Controls Aligned on Right */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">
+          Booking Management
+        </h2>
 
-        {/* Right Aligned Filter Controls: Search, Date, New Booking */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* Right Aligned Filter Controls: Search and Date matching reference screenshot */}
+        <div className="flex flex-wrap items-center gap-3">
           <SearchBar
             value={searchTerm}
             onChange={setSearchTerm}
-            placeholder="Search employee, ID..."
-            className="w-56 sm:w-64"
+            placeholder="Search Emp, ID, Booking ID"
+            className="w-64 sm:w-72"
           />
 
           <DatePicker
             value={selectedDate}
             onChange={setSelectedDate}
           />
-
-          <button
-            type="button"
-            onClick={() => dispatch({ type: 'OPEN_FORM' })}
-            className="h-9 inline-flex items-center gap-1.5 bg-[#183a7b] hover:bg-[#122b5e] text-white px-3.5 rounded-lg text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
-          >
-            <Plus size={14} />
-            <span>New Booking</span>
-          </button>
         </div>
       </div>
 
-      {/* Main Table Card */}
-      <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
-        <BookingTable bookings={filteredBookings} />
-      </div>
+      {/* Main Table */}
+      <BookingTable bookings={filteredBookings} />
 
       {/* Slide-out Drawer */}
       {state.isDetailPanelOpen && <BookingDetailPanel />}
@@ -81,7 +66,7 @@ export const BookingManagement: React.FC = () => {
           onClose={() => dispatch({ type: 'CLOSE_FORM' })}
         />
       )}
-    </section>
+    </div>
   );
 };
 

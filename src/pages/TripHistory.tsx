@@ -1,130 +1,270 @@
 import { useState } from 'react';
-import { mockBookings } from '../data/mockData';
+import { useBookings } from '../context/BookingContext';
+import { useUser } from '../context/UserContext';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import { History, Filter, Download, MapPin, Clock, User } from 'lucide-react';
-// Assuming generic UI components exist or using standard HTML inputs for simplicity
-// import SearchBar from '../components/ui/SearchBar';
-// import DatePicker from '../components/ui/DatePicker';
+import { History, Download, MapPin, Clock, Calendar, CheckCircle2, XCircle, AlertCircle, UserCheck } from 'lucide-react';
+import { SearchBar } from '../components/ui/SearchBar';
+import { DatePicker } from '../components/ui/DatePicker';
+import { Pagination } from '../components/ui/Pagination';
+import toast from 'react-hot-toast';
 
+/**
+ * Enterprise Trip History & Archive View
+ * Complete audit trail of past passenger transit requests, cancellations, and completed rides.
+ * Dynamically updates from BookingContext and filters by user role.
+ */
 const TripHistory = () => {
+  const { state } = useBookings();
+  const { role, currentUser } = useUser();
+
+  const isStudent = role === 'student';
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const historyBookings = mockBookings.filter(b => 
+  const [selectedDate, setSelectedDate] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [adminViewOnlyMine, setAdminViewOnlyMine] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
+
+  // Base history bookings from live context
+  const historyBookings = state.bookings.filter(b => 
     ['Completed', 'Cancelled', 'Dropped', 'No Show'].includes(b.status)
   );
 
-  const completedCount = historyBookings.filter(b => b.status === 'Completed' || b.status === 'Dropped').length;
-  const cancelledCount = historyBookings.filter(b => b.status === 'Cancelled').length;
-  const noShowCount = historyBookings.filter(b => b.status === 'No Show').length;
+  // Filter trips: if student, strictly only their own trips
+  const roleFilteredBookings = historyBookings.filter((trip) => {
+    if (isStudent || adminViewOnlyMine) {
+      return (
+        trip.employeeName.toLowerCase().includes(currentUser.name.toLowerCase()) ||
+        trip.employeeId === currentUser.id
+      );
+    }
+    return true;
+  });
+
+  const completedCount = roleFilteredBookings.filter(b => b.status === 'Completed' || b.status === 'Dropped').length;
+  const cancelledCount = roleFilteredBookings.filter(b => b.status === 'Cancelled').length;
+  const noShowCount = roleFilteredBookings.filter(b => b.status === 'No Show').length;
+
+  const filteredTrips = roleFilteredBookings.filter((trip) => {
+    const matchesSearch = 
+      trip.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trip.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trip.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trip.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trip.to.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesDate = selectedDate ? trip.date === selectedDate : true;
+
+    const matchesStatus = statusFilter === 'ALL' ? true : trip.status === statusFilter;
+
+    return matchesSearch && matchesDate && matchesStatus;
+  });
+
+  const totalPages = Math.ceil(filteredTrips.length / pageSize) || 1;
+  const paginatedTrips = filteredTrips.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleExport = () => {
+    toast.success(isStudent ? 'Your ride history exported' : 'Fleet trip history archive exported');
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-          <History className="w-6 h-6 mr-2 text-gray-500" />
-          Trip History
-        </h1>
-        <div className="flex space-x-2">
-          <button className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-            <Filter className="w-4 h-4 mr-2" /> Filter
-          </button>
-          <button className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-            <Download className="w-4 h-4 mr-2" /> Export
+    <div className="space-y-7 animate-fade-in">
+      {/* 1. Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            {isStudent ? 'My Campus Ride History' : 'Trip History & Archive'}
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            {isStudent 
+              ? `Personal historical audit of completed campus transit rides for ${currentUser.name}.`
+              : 'Historical audit log of completed passenger circuits, cancellations, and station drop-offs.'}
+          </p>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex items-center gap-3">
+          {!isStudent && (
+            <button
+              type="button"
+              onClick={() => setAdminViewOnlyMine(!adminViewOnlyMine)}
+              className={`h-9 inline-flex items-center gap-2 border px-3.5 rounded-xl text-xs font-semibold shadow-2xs transition-colors cursor-pointer ${
+                adminViewOnlyMine 
+                  ? 'bg-[#102d69] text-white border-[#102d69]' 
+                  : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+              }`}
+            >
+              <UserCheck className={`w-3.5 h-3.5 ${adminViewOnlyMine ? 'text-blue-200' : 'text-slate-500'}`} />
+              <span>{adminViewOnlyMine ? `My Dispatch Rides` : 'All Fleet Trips'}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleExport}
+            className="h-9 inline-flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 rounded-xl text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>{isStudent ? 'Export My Rides' : 'Export Archive'}</span>
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-4">
-          <p className="text-sm text-gray-500 mb-1">Total Trips</p>
-          <p className="text-2xl font-bold text-gray-900">{historyBookings.length}</p>
+      {/* 2. KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Trips */}
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 shrink-0">
+            <History className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-2xl font-extrabold text-slate-900 leading-none">{roleFilteredBookings.length}</div>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">
+              {isStudent ? 'My Recorded Trips' : 'Archived Trips'}
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-4 border-b-4 border-green-500">
-          <p className="text-sm text-gray-500 mb-1">Completed</p>
-          <p className="text-2xl font-bold text-gray-900">{completedCount}</p>
+
+        {/* Completed */}
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-2xl font-extrabold text-slate-900 leading-none">{completedCount}</div>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Completed / Dropped</div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-4 border-b-4 border-red-500">
-          <p className="text-sm text-gray-500 mb-1">Cancelled</p>
-          <p className="text-2xl font-bold text-gray-900">{cancelledCount}</p>
+
+        {/* Cancelled */}
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-700 shrink-0">
+            <XCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-2xl font-extrabold text-slate-900 leading-none">{cancelledCount}</div>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Cancelled Requests</div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-4 border-b-4 border-orange-500">
-          <p className="text-sm text-gray-500 mb-1">No Show</p>
-          <p className="text-2xl font-bold text-gray-900">{noShowCount}</p>
+
+        {/* No Show */}
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+            <AlertCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-2xl font-extrabold text-slate-900 leading-none">{noShowCount}</div>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Passenger No-Shows</div>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col md:flex-row gap-4">
-        <div className="flex-1 relative">
-          <input 
-            type="text" 
-            placeholder="Search by Employee ID or Name" 
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+      {/* 3. Filter Bar */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <SearchBar 
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(val) => {
+              setSearchTerm(val);
+              setCurrentPage(1);
+            }}
+            placeholder="Search employee, ID..."
+            className="w-full sm:w-64"
           />
-          <User className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
+
+          <DatePicker 
+            value={selectedDate}
+            onChange={(val) => {
+              setSelectedDate(val);
+              setCurrentPage(1);
+            }}
+          />
         </div>
-        <div className="flex-1">
-           <input type="date" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" />
-        </div>
-        <div className="flex-1">
-          <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-            <option value="">All Statuses</option>
+
+        {/* Status Dropdown */}
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <span className="text-xs font-semibold text-slate-500">Status:</span>
+          <select 
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="h-9 px-3 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="ALL">All Statuses</option>
             <option value="Completed">Completed</option>
+            <option value="Dropped">Dropped</option>
             <option value="Cancelled">Cancelled</option>
             <option value="No Show">No Show</option>
           </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {historyBookings.map((trip) => {
-          let borderColor = 'border-gray-200';
-          if (trip.status === 'Completed' || trip.status === 'Dropped') borderColor = 'border-green-500';
-          if (trip.status === 'Cancelled') borderColor = 'border-red-500';
-          if (trip.status === 'No Show') borderColor = 'border-orange-500';
+      {/* 4. Trips Cards Grid */}
+      {filteredTrips.length === 0 ? (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-12 text-center">
+          <History className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-slate-900 mb-1">No trip records found</h3>
+          <p className="text-xs text-slate-500">Try adjusting your filters or date selection.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {paginatedTrips.map((trip) => (
+            <div 
+              key={trip.id} 
+              className="bg-white rounded-xl border border-slate-200 shadow-xs hover:shadow-md transition-all p-4.5 flex flex-col justify-between"
+            >
+              <div>
+                {/* Header */}
+                <div className="flex items-start justify-between gap-2 pb-3 border-b border-slate-100">
+                  <div>
+                    <span className="font-mono text-xs font-semibold text-slate-500">#{trip.id}</span>
+                    <h3 className="text-sm font-bold text-slate-900 mt-0.5">{trip.employeeName}</h3>
+                    <div className="text-[11px] text-slate-400 font-mono">ID: {trip.employeeId}</div>
+                  </div>
 
-          return (
-            <div key={trip.id} className={`bg-white rounded-xl shadow-sm p-5 border-l-4 ${borderColor}`}>
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <span className="text-xs font-mono text-gray-500 mb-1 block">ID: {trip.id}</span>
                   <StatusBadge status={trip.status} />
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">{trip.employeeName}</p>
-                  <p className="text-xs text-gray-500">Driver: {trip.driverName || 'N/A'}</p>
+
+                {/* Route Information */}
+                <div className="py-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                    <MapPin className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>{trip.from}</span>
+                    <span className="text-slate-400 font-bold">→</span>
+                    <span>{trip.to}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center text-sm text-gray-700 mb-2 font-medium">
-                <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                <span className="truncate">{trip.from} &rarr; {trip.to}</span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm text-gray-500 mt-4 pt-3 border-t border-gray-100">
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  <span>{trip.date} • {trip.requestedPickupTime}</span>
+              {/* Footer Details */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <div className="flex items-center gap-1 font-mono text-slate-600">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{trip.date}</span>
+                  <span className="text-slate-300 mx-1">•</span>
+                  <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{trip.requestedPickupTime}</span>
                 </div>
-                <div>
-                  <span className="px-2 py-1 bg-gray-100 rounded text-xs">Vehicle: EV-100</span>
+
+                <div className="font-mono text-slate-600 font-medium">
+                  {trip.vehicle || 'Standard Van'}
                 </div>
               </div>
             </div>
-          )
-        })}
-      </div>
-      
-      <div className="flex justify-center mt-6">
-        <nav className="flex space-x-1">
-          <button className="px-3 py-1 rounded bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">Prev</button>
-          <button className="px-3 py-1 rounded bg-blue-600 text-white font-medium">1</button>
-          <button className="px-3 py-1 rounded bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">2</button>
-          <button className="px-3 py-1 rounded bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">3</button>
-          <button className="px-3 py-1 rounded bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">Next</button>
-        </nav>
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* 5. Pagination */}
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredTrips.length}
+        pageSize={pageSize}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

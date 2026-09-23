@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 export interface PaginationProps {
   currentPage: number;
@@ -44,8 +44,8 @@ export const Pagination: React.FC<PaginationProps> = ({
     return pages.map((page, index) => {
       if (page === '...') {
         return (
-          <span key={`ellipsis-${index}`} className="px-2 py-1 text-slate-400">
-            <MoreHorizontal className="h-3.5 w-3.5" />
+          <span key={`ellipsis-${index}`} className="px-1 text-slate-400 text-xs">
+            ...
           </span>
         );
       }
@@ -54,10 +54,10 @@ export const Pagination: React.FC<PaginationProps> = ({
           key={`page-${page}`}
           type="button"
           onClick={() => onPageChange(page as number)}
-          className={`min-w-[32px] h-8 px-2 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-md text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center ${
             currentPage === page
-              ? 'bg-[#183a7b] text-white shadow-2xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              ? 'border border-[#1a73e8] text-[#1a73e8] bg-white shadow-2xs'
+              : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
           }`}
         >
           {page}
@@ -69,38 +69,24 @@ export const Pagination: React.FC<PaginationProps> = ({
   if (totalItems === 0) return null;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/50 border-t border-slate-200/80">
+    <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4 pb-1 text-xs select-none">
       {/* Item Range */}
-      <p className="text-xs text-slate-500 font-medium">
-        Showing <span className="font-semibold text-slate-800">{start}</span> to{' '}
-        <span className="font-semibold text-slate-800">{end}</span> of{' '}
-        <span className="font-semibold text-slate-800">{totalItems}</span> items
-      </p>
+      <span className="text-slate-500 font-normal">
+        Showing {start}-{end} of {totalItems} items
+      </span>
 
       {/* Page Navigation Controls */}
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="h-8 px-2.5 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-200/80 bg-white shadow-2xs flex items-center gap-1"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Prev</span>
-        </button>
-
-        <div className="flex items-center gap-1 px-1">
-          {renderPageNumbers()}
-        </div>
+      <div className="flex items-center gap-1.5">
+        {renderPageNumbers()}
 
         <button
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="h-8 px-2.5 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-200/80 bg-white shadow-2xs flex items-center gap-1"
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none transition-colors flex items-center justify-center cursor-pointer shadow-2xs"
+          title="Next page"
         >
-          <span className="hidden sm:inline">Next</span>
-          <ChevronRight className="h-3.5 w-3.5" />
+          <ChevronRight className="h-4 w-4" />
         </button>
       </div>
     </div>

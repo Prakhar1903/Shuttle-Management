@@ -10,95 +10,100 @@ import { DriverTimeline } from './DriverTimeline';
  * Clean enterprise Gantt scheduling view with driver search,
  * pixel-perfect hourly grid, and separated legend.
  */
+import { MapPin, Coffee, Bus } from 'lucide-react';
+
 export const DriverManagement: React.FC = () => {
   const { state } = useDrivers();
   const { drivers } = state;
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDate, setSelectedDate] = useState('2021-12-16');
+  const [selectedDate, setSelectedDate] = useState('2024-12-16');
   const [selectedDriverId, setSelectedDriverId] = useState<string | undefined>();
 
   const filteredDrivers = drivers.filter(driver => 
     driver.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  // The scheduler keeps its initial viewport deliberately concise, as in the
+  // supplied design. A search always returns every matching driver.
+  const displayedDrivers = searchQuery ? filteredDrivers : filteredDrivers.slice(0, 3);
 
   return (
-    <section className="space-y-3">
-      {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight">Driver Availability</h2>
-          <p className="text-xs text-slate-500 mt-0.5">Live duty timelines, shift progress, and hourly driver scheduling.</p>
-        </div>
+    <section className="scheduler-card bg-white rounded-[14px] border border-[#dedfe3] shadow-sm">
+      {/* Card Header: Title on Left, Date Picker on Right */}
+      <div className="scheduler-head flex items-center justify-between">
+        <h2 className="scheduler-title text-[17px] font-semibold text-[#171923] tracking-[-0.02em]">
+          Driver Management
+        </h2>
 
-        {/* Action Controls & Date */}
-        <div className="flex items-center gap-3">
-          <DatePicker 
-            value={selectedDate} 
-            onChange={setSelectedDate} 
-          />
-        </div>
+        {/* Date Selector */}
+        <DatePicker 
+          value={selectedDate} 
+          onChange={setSelectedDate} 
+        />
       </div>
 
-      {/* Main Scheduling Card: Synchronized Grid */}
-      <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden flex">
-        {/* Left Column: Search & Driver Names (w-64 fixed) */}
-        <div className="w-64 shrink-0 border-r border-slate-200/90 bg-white flex flex-col">
-          {/* Top Left Header Cell (40px = h-10 matching timeline hours) */}
-          <div className="h-10 px-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center">
+      {/* Main Scheduling Grid: Synchronized Canvas */}
+      <div className="scheduler-grid rounded-[10px] border border-[#dedfe3] overflow-hidden flex bg-white">
+        {/* Left Column: Search & Driver Names (w-[210px] fixed matching reference) */}
+        <div className="w-[239px] shrink-0 border-r border-[#e0e2e6] bg-white flex flex-col">
+          {/* Top Left Header Cell matching reference */}
+          <div className="h-[65px] pl-7 pr-5 bg-[#e9edf7] border-b border-[#e0e2e6] flex items-center">
             <SearchBar 
               value={searchQuery}
               onChange={setSearchQuery}
-              placeholder="Search driver..."
-              className="w-full text-xs"
+              placeholder="Search driver"
+              className="w-full"
             />
           </div>
-          {/* Driver Rows (each item 64px = h-16) */}
+          {/* Driver Rows */}
           <DriverList 
-            drivers={filteredDrivers}
+            drivers={displayedDrivers}
             selectedDriverId={selectedDriverId}
             onSelectDriver={(d) => setSelectedDriverId(d.id)}
           />
         </div>
 
-        {/* Right Column: Timeline Canvas (Hours Header + Shift Tracks) */}
+        {/* Right Column: Timeline Canvas */}
         <div className="flex-1 overflow-x-auto bg-white min-w-0">
-          <DriverTimeline drivers={filteredDrivers} />
+          <DriverTimeline drivers={displayedDrivers} />
         </div>
       </div>
 
-      {/* Separated Legend Bar */}
-      <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 pt-1 px-1">
-        <span className="font-medium text-slate-400">Timeline Key:</span>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 select-none">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <span className="text-slate-600 font-medium">Duty Start</span>
-          </div>
+      {/* Timeline Legend matching reference screenshot */}
+      <div className="flex flex-nowrap items-center justify-end overflow-x-auto text-[13px] text-slate-700 gap-x-6 pt-3 select-none">
+        <div className="flex items-center gap-1.5">
+          <span className="w-5 h-4 rounded bg-[#e6f4ea] border border-[#a3e635]/60 text-[#137333] flex items-center justify-center font-bold text-[10px]">
+            →
+          </span>
+          <span className="font-medium text-slate-800">Duty Start</span>
+        </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-            <span className="text-slate-600 font-medium">Duty End</span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-5 h-4 rounded bg-[#fde8e8] border border-[#fca5a5]/60 text-[#d9384e] flex items-center justify-center font-bold text-[10px]">
+            ↳
+          </span>
+          <span className="font-medium text-slate-800">Duty End</span>
+        </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-            <span className="text-slate-600 font-medium">Pickup / Drop</span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <MapPin size={13} className="text-[#1e3a8a] fill-[#1e3a8a]" />
+          <span className="font-medium text-slate-800">Pickup/Drop</span>
+        </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-            <span className="text-slate-600 font-medium">Break Period</span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <Coffee size={13} className="text-[#713f12] fill-[#713f12]" />
+          <span className="font-medium text-slate-800">Break</span>
+        </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-teal-500"></span>
-            <span className="text-slate-600 font-medium">Vehicle Change</span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <Bus size={13} className="text-[#0f766e]" />
+          <span className="font-medium text-slate-800">Vehicle Change</span>
+        </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
-            <span className="text-slate-500 font-medium">Empty Leg</span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-bold text-[#9d174d] bg-[#fce7f3] border border-[#f472b6]/50 px-1 py-0.2 rounded">
+            -9
+          </span>
+          <span className="font-medium text-slate-800">Empty Leg</span>
         </div>
       </div>
     </section>
