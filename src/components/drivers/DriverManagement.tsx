@@ -1,20 +1,21 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useDrivers } from '../../context/DriverContext';
 import { SearchBar } from '../ui/SearchBar';
 import { DatePicker } from '../ui/DatePicker';
 import { DriverList } from './DriverList';
 import { DriverTimeline } from './DriverTimeline';
-import { Play, Square, MapPin, Coffee, Bus, GripHorizontal } from 'lucide-react';
+import { MapPin, Coffee, Bus, LogIn, LogOut } from 'lucide-react';
 
 /**
- * Driver Management section — top half of the Management page.
- * Contains driver list with search, timeline visualization, and legend.
+ * Driver Availability Management
+ * Top half of the main Operations Management view.
+ * Features driver search, schedule timeline, and duty state controls.
  */
 export const DriverManagement: React.FC = () => {
   const { state } = useDrivers();
   const { drivers } = state;
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState('2021-12-16');
   const [selectedDriverId, setSelectedDriverId] = useState<string | undefined>();
 
   const filteredDrivers = drivers.filter(driver => 
@@ -22,80 +23,91 @@ export const DriverManagement: React.FC = () => {
   );
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-800">Driver Management</h2>
+    <section className="bg-white rounded-2xl shadow-xs border border-gray-200/80 p-5 md:p-6 mb-7 transition-all">
+      {/* Top Header Row */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-1">
+        <div>
+          <h2 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Driver Management</h2>
+          <p className="text-xs text-slate-500 mt-0.5">Real-time driver roster, shift timelines, and hourly availability</p>
+        </div>
+        
+        {/* Date Selector matching MoveInSync ("Dec 16, 2021") */}
         <DatePicker 
           value={selectedDate} 
           onChange={setSelectedDate} 
         />
       </div>
 
-      <div className="flex border rounded-lg overflow-hidden h-[400px]">
-        {/* Left column — Driver List with search */}
-        <div className="w-56 bg-gray-50 flex flex-col border-r">
-          <div className="p-3 border-b">
-            <SearchBar 
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search driver..."
-            />
+      {/* Main Timeline Card Container */}
+      <div className="border border-gray-200/90 rounded-xl overflow-hidden bg-white shadow-2xs">
+        <div className="flex flex-col md:flex-row">
+          {/* Left Column: Driver Search + Driver List */}
+          <div className="w-full md:w-72 shrink-0 bg-slate-50/60 border-b md:border-b-0 md:border-r border-gray-200/90 flex flex-col">
+            {/* Search Input matching Screenshot */}
+            <div className="p-3 border-b border-gray-200/90 bg-white">
+              <SearchBar 
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search driver"
+                className="w-full"
+              />
+            </div>
+            
+            {/* Driver Items */}
+            <div className="flex-1 overflow-y-auto max-h-[380px] md:max-h-none">
+              <DriverList 
+                drivers={filteredDrivers}
+                selectedDriverId={selectedDriverId}
+                onSelectDriver={(d) => setSelectedDriverId(d.id)}
+              />
+            </div>
           </div>
-          <div className="flex-1 overflow-y-auto">
-            <DriverList 
-              drivers={filteredDrivers}
-              selectedDriverId={selectedDriverId}
-              onSelectDriver={(d) => setSelectedDriverId(d.id)}
-            />
-          </div>
-        </div>
 
-        {/* Right column — Timeline */}
-        <div className="flex-1 overflow-x-auto relative bg-white">
-          <DriverTimeline drivers={filteredDrivers} />
+          {/* Right Column: Driver Timeline Grid */}
+          <div className="flex-1 overflow-x-auto bg-white min-w-0">
+            <DriverTimeline drivers={filteredDrivers} />
+          </div>
         </div>
       </div>
 
-      {/* Legend bar */}
-      <div className="flex flex-wrap items-center gap-6 mt-4 pt-4 border-t text-sm text-gray-600">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center text-blue-600">
-            <Play size={14} />
-          </div>
+      {/* Timeline Legend Bar matching Screenshot 1 */}
+      <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 mt-4 pt-4 border-t border-gray-100 text-xs text-slate-600 font-medium select-none">
+        {/* Duty Start */}
+        <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2 py-0.5 rounded">
+          <LogIn size={12} className="text-emerald-700" />
           <span>Duty Start</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center text-blue-600">
-            <Square size={14} />
-          </div>
+
+        {/* Duty End */}
+        <div className="flex items-center gap-1.5 bg-rose-50 text-rose-800 border border-rose-200/80 px-2 py-0.5 rounded">
           <span>Duty End</span>
+          <LogOut size={12} className="text-rose-700" />
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-orange-100 flex items-center justify-center text-orange-500">
-            <MapPin size={14} />
-          </div>
+
+        {/* Pickup/Drop */}
+        <div className="flex items-center gap-1.5 text-blue-700">
+          <MapPin size={13} className="text-blue-600" />
           <span>Pickup/Drop</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-purple-100 flex items-center justify-center text-purple-600">
-            <Coffee size={14} />
-          </div>
+
+        {/* Break */}
+        <div className="flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-300 px-2 py-0.5 rounded">
+          <Coffee size={13} className="text-amber-700 fill-amber-700" />
           <span>Break</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-green-100 flex items-center justify-center text-green-600">
-            <Bus size={14} />
-          </div>
+
+        {/* Vehicle Change */}
+        <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2 py-0.5 rounded">
+          <Bus size={13} className="text-emerald-600" />
           <span>Vehicle Change</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded border border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-            <GripHorizontal size={14} />
-          </div>
-          <span>Empty Leg</span>
+
+        {/* Empty Leg */}
+        <div className="flex items-center gap-1.5 bg-gray-100 border border-dashed border-gray-300 px-2 py-0.5 rounded text-gray-500">
+          <span>-9 Empty Leg</span>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
