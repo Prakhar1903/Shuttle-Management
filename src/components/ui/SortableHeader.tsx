@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronsUpDown, ChevronUp, ChevronDown } from 'lucide-react';
 
 export interface SortConfig {
   key: string;
@@ -14,7 +14,7 @@ export interface SortableHeaderProps {
 }
 
 /**
- * Table header cell with sort indicator.
+ * Modern MoveInSync Sortable Table Header Cell
  */
 export const SortableHeader: React.FC<SortableHeaderProps> = ({
   label,
@@ -27,20 +27,25 @@ export const SortableHeader: React.FC<SortableHeaderProps> = ({
 
   return (
     <th
-      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-50 group select-none"
+      className="px-5 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100/70 transition-colors group select-none whitespace-nowrap"
       onClick={() => onSort(sortKey)}
     >
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center gap-1.5">
         <span>{label}</span>
-        <span className="flex flex-col text-gray-400 group-hover:text-gray-500">
-          <ChevronUp
-            className={`h-3 w-3 -mb-1 ${isActive && isAsc ? 'text-blue-600 font-bold' : ''}`}
-          />
-          <ChevronDown
-            className={`h-3 w-3 ${isActive && !isAsc ? 'text-blue-600 font-bold' : ''}`}
-          />
+        <span className="text-slate-400 group-hover:text-slate-600 transition-colors">
+          {isActive ? (
+            isAsc ? (
+              <ChevronUp className="h-3.5 w-3.5 text-blue-600 stroke-[2.5]" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5 text-blue-600 stroke-[2.5]" />
+            )
+          ) : (
+            <ChevronsUpDown className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100" />
+          )}
         </span>
       </div>
     </th>
   );
 };
+
+export default SortableHeader;

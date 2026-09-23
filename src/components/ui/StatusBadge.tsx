@@ -6,14 +6,16 @@ export interface StatusBadgeProps {
 }
 
 /**
- * Color-coded status badge component.
+ * MoveInSync Color-Coded Status Pill Badge
  */
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const colorClass = getStatusColor(status);
   
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide border shadow-2xs select-none whitespace-nowrap ${colorClass}`}>
       {status}
     </span>
   );
 };
+
+export default StatusBadge;
