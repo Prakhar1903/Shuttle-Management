@@ -1,0 +1,255 @@
+@import "tailwindcss";
+
+/* ===================================
+   Shuttle Management System - Global Styles
+   =================================== */
+
+/* Base reset and typography */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8f9fa;
+  color: #1a1a2e;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===================================
+   Timeline Custom Styles
+   =================================== */
+
+/* Timeline container */
+.timeline-container {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Timeline grid lines */
+.timeline-grid-line {
+  border-left: 1px dashed #e5e7eb;
+  height: 100%;
+  position: absolute;
+  top: 0;
+}
+
+/* Timeline current time indicator */
+.timeline-current-time {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #3b82f6;
+  z-index: 10;
+}
+
+.timeline-current-time::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #3b82f6;
+}
+
+/* Timeline segment */
+.timeline-segment {
+  position: absolute;
+  height: 36px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 11px;
+  overflow: hidden;
+}
+
+.timeline-segment:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+}
+
+/* Segment color classes */
+.segment-duty { background-color: #fde68a; border-color: #f59e0b; }
+.segment-break { background-color: #c084fc; border-color: #9333ea; }
+.segment-vehicle-change { background-color: #86efac; border-color: #22c55e; }
+.segment-empty-leg { background-color: #e5e7eb; border-color: #9ca3af; }
+.segment-pickup-drop { background-color: #fde68a; border-color: #f59e0b; }
+
+/* Timeline tooltip */
+.timeline-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1f2937;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.timeline-segment:hover .timeline-tooltip {
+  opacity: 1;
+}
+
+.timeline-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1f2937;
+}
+
+/* ===================================
+   Status Badge Colors
+   =================================== */
+.status-accepted { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.status-waiting { background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+.status-no-show { background-color: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+.status-declined { background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+.status-completed { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+.status-requested { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+.status-on-going { background-color: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+.status-cancelled { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.status-dropped { background-color: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; }
+
+/* ===================================
+   Scrollbar Styles
+   =================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ===================================
+   Animation Classes
+   =================================== */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+/* ===================================
+   Detail Panel
+   =================================== */
+.detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 380px;
+  background: white;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  animation: slideInRight 0.3s ease-out;
+  overflow-y: auto;
+}
+
+/* ===================================
+   Table Styles
+   =================================== */
+.booking-table th {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 2;
+}
+
+.booking-table tr:hover {
+  background-color: #f8fafc;
+}
+
+/* ===================================
+   Sidebar Styles
+   =================================== */
+.sidebar-icon {
+  transition: all 0.2s ease;
+}
+
+.sidebar-icon:hover {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.sidebar-icon.active {
+  background-color: #3b82f6;
+  color: white;
+}
