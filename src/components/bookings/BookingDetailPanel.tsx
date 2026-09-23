@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { X, Bus, Users, User, Star, LogIn, Ban, Edit2, Clock, Phone } from 'lucide-react';
+import { X, Bus, Users, User, Star, LogIn, Ban, Clock, Phone } from 'lucide-react';
 import { useBookings } from '../../context/BookingContext';
 import { StatusBadge } from '../ui/StatusBadge';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import toast from 'react-hot-toast';
 
 /**
- * MoveInSync Employee Journey View and Edit Drawer
- * Faithfully matches Screenshot 2 with Employee Card, Vehicle Card,
- * Route Stops with Delay indicators, Driver Info, and Quick Action buttons.
+ * Slide-out Employee Ride Detail Drawer
+ * Matches Linear / Stripe drawer patterns: calm cards, clear hierarchy, and smooth backdrop.
  */
 export const BookingDetailPanel: React.FC = () => {
   const { state, dispatch } = useBookings();
@@ -32,7 +31,7 @@ export const BookingDetailPanel: React.FC = () => {
   };
 
   const handleSignIn = () => {
-    toast.success(`Rider ${booking.employeeName} signed in successfully!`);
+    toast.success(`Rider ${booking.employeeName} signed in`);
   };
 
   const handleNoShow = () => {
@@ -45,82 +44,84 @@ export const BookingDetailPanel: React.FC = () => {
 
   return (
     <>
-      {/* Dimmed Backdrop Overlay with blur for smooth focus */}
+      {/* Backdrop Overlay */}
       <div 
         onClick={handleClose}
-        className="fixed inset-0 bg-slate-900/35 backdrop-blur-[2px] z-40 transition-opacity animate-fade-in"
+        className="fixed inset-0 bg-slate-900/20 backdrop-blur-[1px] z-40 animate-overlay"
       />
 
-      {/* Slide-out Drawer matching Screenshot 2 */}
+      {/* Slide-out Drawer */}
       <aside 
-        className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-white shadow-2xl z-50 flex flex-col animate-slide-in-right border-l border-gray-200 select-none overflow-hidden"
+        className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-white shadow-xl z-50 flex flex-col animate-drawer border-l border-slate-200 select-none overflow-hidden"
       >
-        {/* Drawer Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
-          <h2 className="text-base font-bold text-slate-800">
-            Booking ID: <span className="font-mono text-blue-700">{booking.id}</span>
-          </h2>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Ride Detail</span>
+            <span className="text-xs font-mono font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded">
+              #{booking.id}
+            </span>
+          </div>
           <button 
             type="button"
             onClick={handleClose} 
-            className="p-1.5 text-gray-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
-            title="Close panel"
+            className="p-1 text-slate-400 hover:text-slate-700 rounded-md hover:bg-slate-100 transition-colors"
+            title="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4.5 h-4.5" />
           </button>
         </div>
 
-        {/* Scrollable Body Content */}
+        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
-          {/* Employee Info Card */}
-          <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-4">
+          {/* Employee Card */}
+          <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-800">{booking.employeeName}</h3>
+                <h3 className="text-base font-bold text-slate-900">{booking.employeeName}</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Emp ID: {booking.employeeId}</p>
               </div>
               <StatusBadge status={booking.status} />
             </div>
 
             <div className="flex items-center justify-between text-xs text-slate-500 mt-3 pt-3 border-t border-slate-200/60">
-              <span>Sign In: -</span>
+              <span>Sign In Status: <span className="font-medium text-slate-700">Pending</span></span>
               <span className="font-medium text-slate-600">Tue, Dec 17</span>
             </div>
           </div>
 
-          {/* Vehicle Info Card */}
-          <div className="border border-slate-200 rounded-xl p-4 bg-white shadow-2xs">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700">
-                <Bus className="w-5 h-5" />
+          {/* Vehicle Information */}
+          <div className="border border-slate-200/80 rounded-xl p-4 bg-white">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700">
+                <Bus className="w-4.5 h-4.5" />
               </div>
-              <div>
-                <h4 className="font-bold text-slate-800 text-sm">{booking.vehicle || 'NB-002-RF'}</h4>
-                <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                  <span className="font-mono">{booking.vehiclePlate || 'UA3282'}</span>
-                  <span>•</span>
-                  <span>{booking.vehicleType || 'White Bus'}</span>
-                  <span>•</span>
-                  <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
-                    <Users size={12} /> {booking.vehicleCapacity || 12}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-slate-900 text-sm">{booking.vehicle || 'NB-002-RF'}</h4>
+                  <span className="inline-flex items-center gap-1 text-xs text-slate-500 font-medium">
+                    <Users size={12} /> {booking.vehicleCapacity || 12} seats
                   </span>
                 </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Plate: {booking.vehiclePlate || 'UA3282'} • {booking.vehicleType || 'White Bus'}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Route Stops with Delay Indicator */}
-          <div className="border border-slate-200 rounded-xl p-4 bg-white shadow-2xs">
-            <div className="relative pl-6 space-y-5 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+          {/* Route Stops with Delay */}
+          <div className="border border-slate-200/80 rounded-xl p-4 bg-white">
+            <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
               {/* Pickup Stop */}
               <div className="relative">
-                <div className="absolute -left-[25px] top-1 w-3 h-3 bg-white border-2 border-blue-600 rounded-full shadow-xs"></div>
+                <div className="absolute -left-[25px] top-1 w-2.5 h-2.5 bg-white border-2 border-blue-600 rounded-full"></div>
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-bold text-slate-800 text-sm">{booking.from}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Requested Pickup Time: {booking.requestedPickupTime}</p>
+                    <p className="font-semibold text-slate-900 text-sm">{booking.from}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Pickup: {booking.requestedPickupTime}</p>
                   </div>
-                  <span className="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded ml-2 whitespace-nowrap">
+                  <span className="text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded">
                     11:25 (+5)
                   </span>
                 </div>
@@ -128,26 +129,26 @@ export const BookingDetailPanel: React.FC = () => {
 
               {/* Drop Stop */}
               <div className="relative">
-                <div className="absolute -left-[25px] top-1 w-3 h-3 bg-white border-2 border-emerald-600 rounded-full shadow-xs"></div>
+                <div className="absolute -left-[25px] top-1 w-2.5 h-2.5 bg-white border-2 border-emerald-600 rounded-full"></div>
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-bold text-slate-800 text-sm">{booking.to}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Planned Drop: {booking.plannedDrop || '11:32'}</p>
+                    <p className="font-semibold text-slate-900 text-sm">{booking.to}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Drop: {booking.plannedDrop || '11:32'}</p>
                   </div>
-                  <span className="text-xs text-slate-400 font-mono">-</span>
+                  <span className="text-xs text-slate-400 font-mono">—</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Driver Profile Card */}
-          <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-white shadow-2xs">
+          {/* Driver Profile */}
+          <div className="flex items-center justify-between p-4 border border-slate-200/80 rounded-xl bg-white">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600">
-                <User className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                <User className="w-4.5 h-4.5" />
               </div>
               <div>
-                <h4 className="font-semibold text-slate-800 text-sm">{booking.driverName || 'Steve Smith'}</h4>
+                <h4 className="font-semibold text-slate-900 text-sm">{booking.driverName || 'Steve Smith'}</h4>
                 <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
                   <Phone size={11} />
                   <span>{booking.driverPhone || '+1-323-493-3293'}</span>
@@ -155,39 +156,39 @@ export const BookingDetailPanel: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded text-xs font-bold">
+            <div className="flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded text-xs font-semibold">
               <span>{booking.driverRating || 4.5}</span>
-              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
             </div>
           </div>
 
-          {/* Quick Action Links */}
-          <div className="space-y-2.5 pt-2">
+          {/* Quick Action Buttons */}
+          <div className="space-y-2 pt-1">
             <button
               type="button"
               onClick={handleSignIn}
-              className="flex items-center gap-2.5 text-blue-700 hover:text-blue-900 text-sm font-semibold p-2 rounded-lg hover:bg-blue-50 transition-colors w-full text-left"
+              className="flex items-center justify-center gap-2 w-full py-2 px-3 text-xs font-semibold text-emerald-700 bg-emerald-50/80 border border-emerald-200/80 rounded-lg hover:bg-emerald-100 transition-colors"
             >
-              <LogIn className="w-4 h-4 text-blue-600" />
+              <LogIn className="w-3.5 h-3.5" />
               <span>Sign in rider</span>
             </button>
 
             <button
               type="button"
               onClick={handleNoShow}
-              className="flex items-center gap-2.5 text-rose-600 hover:text-rose-800 text-sm font-semibold p-2 rounded-lg hover:bg-rose-50 transition-colors w-full text-left"
+              className="flex items-center justify-center gap-2 w-full py-2 px-3 text-xs font-semibold text-rose-700 bg-rose-50/80 border border-rose-200/80 rounded-lg hover:bg-rose-100 transition-colors"
             >
-              <Ban className="w-4 h-4 text-rose-500" />
+              <Ban className="w-3.5 h-3.5" />
               <span>Mark rider as No-show</span>
             </button>
           </div>
         </div>
 
-        {/* Drawer Sticky Footer matching Screenshot 2 */}
-        <div className="p-4 border-t border-gray-200 bg-slate-50/90 flex items-center justify-between gap-3">
+        {/* Sticky Footer */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between gap-3">
           <button 
             type="button"
-            className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 rounded-lg transition-colors border border-slate-300 bg-white shadow-2xs" 
+            className="p-2 text-slate-500 hover:text-slate-800 hover:bg-white rounded-lg transition-colors border border-slate-200 bg-white" 
             title="Trip history"
           >
             <Clock className="w-4 h-4" />
@@ -197,30 +198,28 @@ export const BookingDetailPanel: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowConfirm(true)}
-              className="flex items-center gap-1.5 px-4 py-2 border border-rose-400 text-rose-600 rounded-lg hover:bg-rose-50 transition-all font-semibold text-xs shadow-2xs cursor-pointer"
+              className="px-3.5 py-1.5 border border-rose-200 text-rose-700 rounded-lg hover:bg-rose-50 transition-colors font-medium text-xs bg-white"
             >
-              <Ban className="w-3.5 h-3.5" />
-              <span>Cancel Booking</span>
+              Cancel Booking
             </button>
 
             <button
               type="button"
               onClick={() => dispatch({ type: 'OPEN_FORM', payload: booking })}
-              className="flex items-center gap-1.5 px-5 py-2 bg-[#183876] hover:bg-[#122b5e] text-white rounded-lg transition-all font-semibold text-xs shadow-xs cursor-pointer"
+              className="px-4 py-1.5 bg-[#183a7b] hover:bg-[#122b5e] text-white rounded-lg transition-colors font-semibold text-xs shadow-2xs"
             >
-              <Edit2 className="w-3.5 h-3.5" />
-              <span>Edit</span>
+              Edit
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Cancel Confirmation Dialog */}
+      {/* Confirmation Dialog */}
       {showConfirm && (
         <ConfirmDialog
           isOpen={showConfirm}
           title="Cancel Booking"
-          message={`Are you sure you want to cancel booking #${booking.id} for ${booking.employeeName}? This action cannot be undone.`}
+          message={`Are you sure you want to cancel booking #${booking.id} for ${booking.employeeName}?`}
           onConfirm={handleCancelBooking}
           onCancel={() => setShowConfirm(false)}
         />

@@ -1,9 +1,19 @@
 /**
+ * Time manipulation utilities for Shuttle Management System
+ */
+
+export const TIMELINE_START_HOUR = 6;  // 06:00 AM
+export const TIMELINE_END_HOUR = 22;    // 10:00 PM
+export const TIMELINE_TOTAL_HOURS = TIMELINE_END_HOUR - TIMELINE_START_HOUR; // 16 hours
+export const TIMELINE_TOTAL_MINUTES = TIMELINE_TOTAL_HOURS * 60; // 960 minutes
+
+/**
  * Converts HH:mm time string to minutes from midnight
  */
 export function timeToMinutes(time: string): number {
+  if (!time) return 0;
   const [hours, minutes] = time.split(':').map(Number);
-  return hours * 60 + minutes;
+  return (hours || 0) * 60 + (minutes || 0);
 }
 
 /**
@@ -20,10 +30,9 @@ export function minutesToTime(minutes: number): string {
  */
 export function getTimelinePosition(time: string): number {
   const minutes = timeToMinutes(time);
-  const startMinutes = 6 * 60; // 6:00 AM
-  const endMinutes = 22 * 60;  // 10:00 PM
-  const totalMinutes = endMinutes - startMinutes;
-  return Math.max(0, Math.min(100, ((minutes - startMinutes) / totalMinutes) * 100));
+  const startMinutes = TIMELINE_START_HOUR * 60;
+  const clamped = Math.max(startMinutes, Math.min(TIMELINE_END_HOUR * 60, minutes));
+  return ((clamped - startMinutes) / TIMELINE_TOTAL_MINUTES) * 100;
 }
 
 /**
@@ -32,15 +41,15 @@ export function getTimelinePosition(time: string): number {
 export function getTimelineWidth(startTime: string, endTime: string): number {
   const startMinutes = timeToMinutes(startTime);
   const endMinutes = timeToMinutes(endTime);
-  const totalMinutes = (22 - 6) * 60; // 16 hours
-  return Math.max(0, ((endMinutes - startMinutes) / totalMinutes) * 100);
+  const duration = Math.max(0, endMinutes - startMinutes);
+  return (duration / TIMELINE_TOTAL_MINUTES) * 100;
 }
 
 /**
- * Formats time for display (adds AM/PM if needed)
+ * Formats time for display (keeps 24h format)
  */
 export function formatTime(time: string): string {
-  return time; // Keep 24h format as shown in screenshots
+  return time;
 }
 
 /**
@@ -52,9 +61,10 @@ export function getCurrentTime(): string {
 }
 
 /**
- * Formats a date string for display
+ * Formats a date string for display (e.g. "Dec 16, 2024")
  */
 export function formatDate(dateStr: string): string {
+  if (!dateStr) return '';
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-US', {
     weekday: 'short',
@@ -65,6 +75,6 @@ export function formatDate(dateStr: string): string {
 }
 
 /**
- * Timeline hours array for rendering
+ * Array of 16 hourly intervals: 6, 7, 8, ..., 21
  */
-export const TIMELINE_HOURS = Array.from({ length: 17 }, (_, i) => i + 6); // 6:00 to 22:00
+export const TIMELINE_HOURLY_SLOTS = Array.from({ length: TIMELINE_TOTAL_HOURS }, (_, i) => i + TIMELINE_START_HOUR);

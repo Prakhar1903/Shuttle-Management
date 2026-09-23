@@ -1,76 +1,80 @@
 import React from 'react';
 import type { Driver } from '../../types';
 import { TimelineSegment } from './TimelineSegment';
-import { getTimelinePosition, getTimelineWidth } from '../../utils/timeUtils';
+import { 
+  TIMELINE_HOURLY_SLOTS, 
+  TIMELINE_END_HOUR, 
+  getTimelinePosition, 
+  getTimelineWidth 
+} from '../../utils/timeUtils';
 
 interface DriverTimelineProps {
   drivers: Driver[];
 }
 
 /**
- * Driver Availability Timeline Grid
- * Renders the hourly Gantt timeline with current-time vertical indicator,
- * grid dividers, and interactive driver shift events.
+ * Enterprise Driver Availability Timeline
+ * Pixel-aligned hourly timeline grid with subtle current-time vertical indicator.
  */
 export const DriverTimeline: React.FC<DriverTimelineProps> = ({ drivers }) => {
-  // Hours from 6:00 to 22:00 (17 hours)
-  const hours = Array.from({ length: 17 }, (_, i) => i + 6);
-  
-  // Set current indicator position around mid-day (12:30) to match MoveInSync reference
-  const currentIndicatorPosition = getTimelinePosition('12:30');
+  // Current time position (12:30 for MoveInSync reference)
+  const currentTimePercentage = getTimelinePosition('12:30');
 
   return (
-    <div className="min-w-[1050px] relative select-none">
+    <div className="min-w-[1240px] select-none">
       {/* Timeline Hour Header */}
-      <div className="flex h-11 border-b border-gray-200/90 bg-gray-50/70 text-xs font-semibold text-gray-500 sticky top-0 z-20">
-        {hours.map((hour) => (
+      <div className="h-10 border-b border-slate-200 bg-slate-50/80 flex items-center text-xs font-semibold text-slate-500 sticky top-0 z-20">
+        {TIMELINE_HOURLY_SLOTS.map((hour) => (
           <div 
             key={hour} 
-            className="flex-1 flex items-center justify-center border-r border-gray-200/60 last:border-r-0 font-medium"
+            className="flex-1 flex items-center justify-start pl-2 border-r border-slate-200/70 h-full font-mono text-[11px]"
           >
-            {hour}:00
+            {hour.toString().padStart(2, '0')}:00
           </div>
         ))}
+        {/* Final hour mark at right edge */}
+        <div className="w-12 text-right pr-2 font-mono text-[11px] text-slate-400">
+          {TIMELINE_END_HOUR}:00
+        </div>
       </div>
 
       {/* Grid Canvas */}
       <div className="relative">
-        {/* Full-height Vertical Dashed Guide Lines */}
+        {/* Vertical Column Guides */}
         <div className="absolute inset-0 flex pointer-events-none z-0">
-          {hours.map((hour) => (
+          {TIMELINE_HOURLY_SLOTS.map((hour) => (
             <div 
               key={`grid-${hour}`} 
-              className="flex-1 border-r border-dashed border-gray-200/80 h-full"
+              className="flex-1 border-r border-slate-100 h-full"
             />
           ))}
+          <div className="w-12 h-full" />
         </div>
 
-        {/* Current Time Indicator matching Screenshot 1 (Vertical line at 12:30 with top pin) */}
+        {/* Current Time Indicator (Vertical line at 12:30) */}
         <div 
-          className="absolute top-0 bottom-0 w-[2px] bg-slate-600 z-30 pointer-events-none"
-          style={{ left: `${currentIndicatorPosition}%` }}
+          className="absolute top-0 bottom-0 w-[1.5px] bg-blue-500 z-20 pointer-events-none"
+          style={{ left: `${currentTimePercentage}%` }}
         >
-          {/* Top circle marker */}
-          <div className="absolute -top-2.5 -translate-x-[5px] w-3.5 h-3.5 rounded-full bg-slate-700 border-2 border-white shadow-sm flex items-center justify-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
-          </div>
+          {/* Top Pin Header */}
+          <div className="absolute -top-2.5 -translate-x-[5px] w-3 h-3 rounded-full bg-blue-600 border-2 border-white shadow-xs"></div>
         </div>
 
-        {/* Driver Schedule Tracks */}
+        {/* Driver Rows */}
         <div className="flex flex-col relative z-10">
           {drivers.map((driver) => (
             <div 
               key={driver.id} 
-              className="h-[72px] border-b border-gray-100/90 relative flex items-center hover:bg-slate-50/50 transition-colors group"
+              className="h-16 border-b border-slate-100 relative flex items-center hover:bg-slate-50/40 transition-colors group"
             >
-              {/* Background shift track guide */}
-              <div className="absolute inset-x-0 h-10 top-4 bg-slate-100/40 rounded-lg pointer-events-none border border-slate-200/30"></div>
+              {/* Subtle shift background track */}
+              <div className="absolute inset-x-2 h-9 top-3.5 bg-slate-50/70 rounded-md pointer-events-none border border-slate-200/40"></div>
 
-              {/* Render Driver's Schedule Events */}
+              {/* Driver's Scheduled Events */}
               {driver.schedule?.map((event, index) => {
                 const left = getTimelinePosition(event.startTime);
-                const width = Math.max(2.5, getTimelineWidth(event.startTime, event.endTime));
-                
+                const width = Math.max(3.2, getTimelineWidth(event.startTime, event.endTime));
+
                 return (
                   <TimelineSegment 
                     key={`${driver.id}-event-${index}`} 
@@ -78,7 +82,7 @@ export const DriverTimeline: React.FC<DriverTimelineProps> = ({ drivers }) => {
                     style={{ 
                       left: `${left}%`, 
                       width: `${width}%`,
-                      minWidth: event.type === 'duty-start' || event.type === 'duty-end' ? '38px' : '32px'
+                      minWidth: event.type === 'duty-start' || event.type === 'duty-end' ? '40px' : '44px'
                     }} 
                   />
                 );
@@ -87,8 +91,8 @@ export const DriverTimeline: React.FC<DriverTimelineProps> = ({ drivers }) => {
           ))}
 
           {drivers.length === 0 && (
-            <div className="h-40 flex items-center justify-center text-sm text-gray-400">
-              No schedule records for selected date.
+            <div className="h-32 flex items-center justify-center text-sm text-slate-400">
+              No drivers found for this view.
             </div>
           )}
         </div>

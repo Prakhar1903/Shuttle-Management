@@ -1,11 +1,15 @@
 @import "tailwindcss";
 
-/* ===================================
-   MoveInSync Campus Transit System
-   Global Polished Styles
-   =================================== */
+/* ==========================================================================
+   Design System: Linear / Stripe Enterprise SaaS Aesthetic
+   ========================================================================== */
 
-/* Base reset and typography */
+/* Base typography & Canvas */
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -13,134 +17,112 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #eef1f6;
-  color: #1e293b;
+  font-family: var(--font-sans);
+  background-color: #f8fafc; /* Slate-50: calm, clean canvas */
+  color: #0f172a;            /* Slate-900: high contrast, readable */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===================================
-   Timeline Custom Utilities
-   =================================== */
-
-.timeline-container {
-  position: relative;
-  overflow-x: auto;
-  overflow-y: hidden;
+/* ==========================================================================
+   Semantic Status Badges
+   ========================================================================== */
+.badge-semantic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.2rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  border-width: 1px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
-/* Timeline segment color definitions */
-.segment-duty { 
-  background-color: #dce7f6; 
-  border-color: #9cbce5; 
-  color: #173874;
-}
-
-.segment-break { 
-  background-color: #fde047; 
-  border-color: #eab308; 
-  color: #713f12;
-}
-
-.segment-vehicle-change { 
-  background-color: #bbf7d0; 
-  border-color: #4ade80; 
-  color: #14532d;
-}
-
-.segment-empty-leg { 
-  background-color: #f1f5f9; 
-  border-color: #cbd5e1; 
-  color: #64748b;
-}
-
-/* ===================================
-   Status Badge Colors (MoveInSync Theme)
-   =================================== */
 .status-accepted { 
-  background-color: #dcfce7; 
+  background-color: #f0fdf4; 
   color: #15803d; 
-  border: 1px solid #bbf7d0; 
+  border-color: #bbf7d0; 
 }
 
 .status-waiting { 
-  background-color: #fef9c3; 
-  color: #854d0e; 
-  border: 1px solid #fef08a; 
+  background-color: #fefce8; 
+  color: #a16207; 
+  border-color: #fef08a; 
 }
 
 .status-no-show { 
-  background-color: #ffedd5; 
+  background-color: #fff7ed; 
   color: #c2410c; 
-  border: 1px solid #fed7aa; 
+  border-color: #fed7aa; 
 }
 
 .status-declined { 
-  background-color: #f1f5f9; 
+  background-color: #f8fafc; 
   color: #475569; 
-  border: 1px solid #e2e8f0; 
+  border-color: #e2e8f0; 
 }
 
 .status-completed { 
-  background-color: #dbeafe; 
+  background-color: #eff6ff; 
   color: #1d4ed8; 
-  border: 1px solid #bfdbfe; 
+  border-color: #bfdbfe; 
 }
 
 .status-requested { 
-  background-color: #f3e8ff; 
+  background-color: #faf5ff; 
   color: #7e22ce; 
-  border: 1px solid #e9d5ff; 
+  border-color: #e9d5ff; 
 }
 
 .status-on-going { 
-  background-color: #e0e7ff; 
+  background-color: #eef2ff; 
   color: #4338ca; 
-  border: 1px solid #c7d2fe; 
+  border-color: #c7d2fe; 
 }
 
 .status-cancelled { 
-  background-color: #fee2e2; 
+  background-color: #fef2f2; 
   color: #b91c1c; 
-  border: 1px solid #fecaca; 
+  border-color: #fecaca; 
 }
 
 .status-dropped { 
-  background-color: #fce7f3; 
+  background-color: #fdf2f8; 
   color: #be185d; 
-  border: 1px solid #fbcfe8; 
+  border-color: #fbcfe8; 
 }
 
-/* ===================================
-   Smooth Scrollbar Styles
-   =================================== */
+/* ==========================================================================
+   Custom Minimalist Scrollbars
+   ========================================================================== */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 4px;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-/* ===================================
-   Animations
-   =================================== */
-@keyframes slideInRight {
+/* ==========================================================================
+   Subtle Transitions & Animations
+   ========================================================================== */
+@keyframes drawerSlide {
   from {
     transform: translateX(100%);
-    opacity: 0.5;
+    opacity: 0.8;
   }
   to {
     transform: translateX(0);
@@ -148,30 +130,15 @@ body {
   }
 }
 
-@keyframes fadeIn {
+@keyframes fadeInOverlay {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes scaleIn {
-  from {
-    transform: scale(0.96);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+.animate-drawer {
+  animation: drawerSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-slide-in-right {
-  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out forwards;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.animate-overlay {
+  animation: fadeInOverlay 0.18s ease-out forwards;
 }

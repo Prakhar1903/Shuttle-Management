@@ -8,10 +8,8 @@ import { DatePicker } from '../ui/DatePicker';
 import { Plus } from 'lucide-react';
 
 /**
- * Booking Management Container
- * Bottom half of the main Operations Management view.
- * Handles booking filters, sortable/paginated bookings table,
- * slide-out rider journey drawer, and booking creation modal.
+ * Booking Management Section
+ * Enterprise data table container with aligned filters and consistent 36px controls.
  */
 export const BookingManagement: React.FC = () => {
   const { state, dispatch } = useBookings();
@@ -32,21 +30,23 @@ export const BookingManagement: React.FC = () => {
   });
 
   return (
-    <section className="bg-white rounded-2xl shadow-xs border border-gray-200/80 p-5 md:p-6 transition-all">
-      {/* Top Header Row with Search & Date Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5 pb-1">
+    <section className="space-y-3">
+      {/* Section Header: Title on Left, Controls Aligned on Right */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Booking Management</h2>
-          <p className="text-xs text-slate-500 mt-0.5">Manage passenger shuttle requests, trip schedules, and vehicle assignments</p>
+          <h2 className="text-lg font-bold text-slate-900 tracking-tight">Booking Management</h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Monitor passenger transit requests, schedule assignments, and trip execution.
+          </p>
         </div>
 
-        {/* Search, Date, and Add Booking Controls matching MoveInSync UI */}
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Right Aligned Filter Controls: Search, Date, New Booking */}
+        <div className="flex flex-wrap items-center gap-2.5">
           <SearchBar
             value={searchTerm}
             onChange={setSearchTerm}
-            placeholder="Search Emp, ID, Booking ID"
-            className="w-full sm:w-64"
+            placeholder="Search employee, ID..."
+            className="w-56 sm:w-64"
           />
 
           <DatePicker
@@ -57,21 +57,23 @@ export const BookingManagement: React.FC = () => {
           <button
             type="button"
             onClick={() => dispatch({ type: 'OPEN_FORM' })}
-            className="inline-flex items-center gap-1.5 bg-[#183876] hover:bg-[#122b5e] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-xs transition-all cursor-pointer"
+            className="h-9 inline-flex items-center gap-1.5 bg-[#183a7b] hover:bg-[#122b5e] text-white px-3.5 rounded-lg text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
           >
-            <Plus size={16} />
+            <Plus size={14} />
             <span>New Booking</span>
           </button>
         </div>
       </div>
 
-      {/* Bookings Table Component */}
-      <BookingTable bookings={filteredBookings} />
+      {/* Main Table Card */}
+      <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+        <BookingTable bookings={filteredBookings} />
+      </div>
 
-      {/* Slide-out Employee Journey Drawer */}
+      {/* Slide-out Drawer */}
       {state.isDetailPanelOpen && <BookingDetailPanel />}
 
-      {/* Booking Form Modal */}
+      {/* New/Edit Booking Modal */}
       {state.isFormOpen && (
         <BookingForm
           booking={state.selectedBooking}

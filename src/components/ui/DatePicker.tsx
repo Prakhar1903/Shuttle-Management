@@ -8,15 +8,13 @@ export interface DatePickerProps {
 }
 
 /**
- * MoveInSync Date Picker
- * Styled rounded pill with calendar icon matching the reference UI.
+ * Enterprise Date Selector (h-9 / 36px)
  */
 export const DatePicker: React.FC<DatePickerProps> = ({
   value,
   onChange,
   className = '',
 }) => {
-  // Format the date string for display (e.g. "Dec 16, 2024")
   const formatDisplay = (val: string) => {
     if (!val) return 'Select Date';
     try {
@@ -33,9 +31,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   return (
     <div className={`relative inline-flex items-center ${className}`}>
-      <label className="flex items-center gap-2 px-3.5 py-1.5 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 font-medium hover:border-gray-400 hover:bg-gray-50/70 transition-all cursor-pointer shadow-2xs">
+      <label className="h-9 flex items-center gap-2 px-3 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 font-medium hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer shadow-2xs select-none">
+        <Calendar className="w-3.5 h-3.5 text-slate-400" />
         <span className="whitespace-nowrap">{formatDisplay(value)}</span>
-        <Calendar className="w-4 h-4 text-gray-500" />
         <input
           type="date"
           value={value}

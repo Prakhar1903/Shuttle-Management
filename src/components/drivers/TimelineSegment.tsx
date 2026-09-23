@@ -8,9 +8,8 @@ interface TimelineSegmentProps {
 }
 
 /**
- * MoveInSync Timeline Segment Component
- * Renders duty blocks, break periods, vehicle changes, and pickup/drop markers
- * with authentic MoveInSync styling and hover summary tooltips.
+ * Clean Enterprise Timeline Event Segment
+ * Calm colors, clear typography, and subtle hover popover.
  */
 export const TimelineSegment: React.FC<TimelineSegmentProps> = ({ event, style }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -19,51 +18,52 @@ export const TimelineSegment: React.FC<TimelineSegmentProps> = ({ event, style }
     switch (event.type) {
       case 'duty-start':
         return (
-          <div className="h-full bg-emerald-100/90 text-emerald-800 border border-emerald-300 rounded px-1.5 flex items-center gap-1 font-semibold text-[11px] shadow-2xs">
-            <LogIn size={11} className="text-emerald-700" />
+          <div className="h-8 px-2 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/90 flex items-center gap-1 text-[11px] font-semibold shadow-2xs">
+            <LogIn size={12} className="text-emerald-600" />
             <span>→9</span>
           </div>
         );
 
       case 'duty-end':
         return (
-          <div className="h-full bg-rose-100/90 text-rose-800 border border-rose-300 rounded px-1.5 flex items-center gap-1 font-semibold text-[11px] shadow-2xs">
+          <div className="h-8 px-2 rounded-md bg-rose-50 text-rose-800 border border-rose-200/90 flex items-center gap-1 text-[11px] font-semibold shadow-2xs">
             <span>9←</span>
-            <LogOut size={11} className="text-rose-700" />
+            <LogOut size={12} className="text-rose-600" />
           </div>
         );
 
       case 'break':
         return (
-          <div className="h-full w-full bg-[#fde047] text-amber-900 border border-amber-400 rounded-md flex items-center justify-center gap-1 font-medium text-xs shadow-2xs px-2">
-            <Coffee size={13} className="text-amber-950 fill-amber-900" />
+          <div className="h-8 w-full px-2.5 rounded-md bg-amber-100/90 text-amber-900 border border-amber-300 flex items-center justify-center gap-1.5 text-xs font-medium shadow-2xs">
+            <Coffee size={13} className="text-amber-800" />
+            <span className="text-[11px] font-semibold">Break</span>
           </div>
         );
 
       case 'vehicle-change':
         return (
-          <div className="h-full w-full bg-emerald-200 text-emerald-900 border border-emerald-400 rounded-md flex items-center justify-center gap-1 text-xs shadow-2xs px-2">
-            <Bus size={13} />
-            <span className="text-[10px] font-bold">UA3282</span>
+          <div className="h-8 w-full px-2 rounded-md bg-teal-50 text-teal-800 border border-teal-200/90 flex items-center justify-center gap-1 text-xs shadow-2xs font-medium">
+            <Bus size={13} className="text-teal-600" />
+            <span className="text-[10px] font-semibold">Vehicle</span>
           </div>
         );
 
       case 'pickup':
       case 'drop':
         return (
-          <div className="h-full w-full bg-[#d6e4f8] text-[#1b3d75] border border-[#a4c0ea] rounded-md flex items-center justify-center gap-1 shadow-2xs px-1 hover:brightness-95 transition-all">
-            <MapPin size={13} className={event.type === 'drop' ? 'fill-current text-blue-800' : 'text-blue-700'} />
-            {(event.pickupCount || event.dropCount) && (
-              <span className="text-[10px] font-bold text-blue-900">
-                {event.pickupCount ? `+${event.pickupCount}` : `-${event.dropCount}`}
+          <div className="h-8 w-full px-2 rounded-md bg-blue-50 text-blue-800 border border-blue-200 flex items-center justify-center gap-1 text-xs shadow-2xs hover:bg-blue-100/70 transition-colors">
+            <MapPin size={12} className={event.type === 'drop' ? 'text-blue-700 fill-blue-700' : 'text-blue-600'} />
+            {(event.pickupCount || event.dropCount) ? (
+              <span className="text-[11px] font-semibold text-blue-900">
+                {event.pickupCount ? `${event.pickupCount}P` : `${event.dropCount}D`}
               </span>
-            )}
+            ) : null}
           </div>
         );
 
       case 'empty-leg':
         return (
-          <div className="h-full w-full bg-gray-100/90 border border-dashed border-gray-300 rounded-md flex items-center justify-between px-2 text-gray-500 text-[10px] font-semibold">
+          <div className="h-8 w-full px-2 rounded-md bg-slate-50 border border-dashed border-slate-300 flex items-center justify-between text-[10px] font-medium text-slate-500">
             <span>-9</span>
             <span>-9</span>
           </div>
@@ -71,33 +71,38 @@ export const TimelineSegment: React.FC<TimelineSegmentProps> = ({ event, style }
 
       default:
         return (
-          <div className="h-full w-full bg-[#d6e4f8] border border-[#a4c0ea] rounded-md" />
+          <div className="h-8 w-full rounded-md bg-slate-100 border border-slate-200" />
         );
     }
   };
 
+  const getTooltipLabel = () => {
+    if (event.pickupCount || event.dropCount) {
+      const parts = [];
+      if (event.pickupCount) parts.push(`${event.pickupCount} Pickup`);
+      if (event.dropCount) parts.push(`${event.dropCount} Drop`);
+      return parts.join(', ');
+    }
+    return event.label || event.type;
+  };
+
   return (
     <div 
-      className="absolute top-3.5 bottom-3.5 z-10 transition-transform duration-100 hover:scale-[1.02] cursor-pointer"
+      className="absolute top-4 z-10 transition-transform duration-150 hover:scale-[1.02] cursor-pointer"
       style={style}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
       {renderContent()}
       
-      {/* Floating Dark Popover matching Screenshot (e.g. "2 Pickup, 3 Drop") */}
+      {/* Tooltip on hover */}
       {showTooltip && (
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap z-50 pointer-events-none flex flex-col items-center border border-slate-700">
-          <div className="font-semibold text-center leading-tight">
-            {event.pickupCount || event.dropCount 
-              ? `${event.pickupCount || 0} Pickup, ${event.dropCount || 0} Drop`
-              : (event.label || event.type)}
-          </div>
-          <div className="text-[10px] text-slate-300 font-mono">
+        <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs py-1.5 px-3 rounded-md shadow-lg whitespace-nowrap z-50 pointer-events-none flex flex-col items-center border border-slate-800">
+          <span className="font-semibold">{getTooltipLabel()}</span>
+          <span className="text-[10px] text-slate-300 font-mono">
             {event.startTime} - {event.endTime}
-          </div>
-          {/* Arrow */}
-          <div className="w-2 h-2 bg-slate-900 rotate-45 absolute -bottom-1 border-r border-b border-slate-700"></div>
+          </span>
+          <div className="w-2 h-2 bg-slate-900 rotate-45 absolute -bottom-1 border-r border-b border-slate-800"></div>
         </div>
       )}
     </div>

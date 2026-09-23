@@ -12,9 +12,9 @@ interface BookingTableProps {
 }
 
 /**
- * Modern MoveInSync Booking Management Data Table
- * Features multi-column sorting, color status pills, crisp typography,
- * generous cell padding, and smooth row hover transitions.
+ * Enterprise Booking Data Table
+ * Clean Linear/Stripe aesthetic: comfortable row height, subtle horizontal borders,
+ * clear typography, and responsive horizontal scrolling.
  */
 const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   const { dispatch } = useBookings();
@@ -29,12 +29,12 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   } = usePagination(sortedItems, 10);
 
   return (
-    <div className="mt-4">
-      {/* Outer Card Wrapper */}
-      <div className="overflow-x-auto border border-slate-200/90 rounded-2xl bg-white shadow-2xs">
-        <table className="min-w-full divide-y divide-slate-200/90 text-left text-sm">
+    <div className="w-full flex flex-col">
+      {/* Scrollable Table Area */}
+      <div className="overflow-x-auto min-w-full">
+        <table className="w-full text-left border-collapse min-w-[1140px]">
           {/* Table Header */}
-          <thead className="bg-slate-50/90 text-xs font-bold text-slate-600 uppercase tracking-wider select-none">
+          <thead className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider select-none">
             <tr>
               <SortableHeader label="Booking ID" sortKey="id" currentSort={sortConfig} onSort={requestSort} />
               <SortableHeader label="Employee" sortKey="employeeName" currentSort={sortConfig} onSort={requestSort} />
@@ -42,83 +42,79 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
               <SortableHeader label="From" sortKey="from" currentSort={sortConfig} onSort={requestSort} />
               <SortableHeader label="To" sortKey="to" currentSort={sortConfig} onSort={requestSort} />
               <SortableHeader label="Vehicle" sortKey="vehicle" currentSort={sortConfig} onSort={requestSort} />
-              <SortableHeader label="Requested Pickup Time" sortKey="requestedPickupTime" currentSort={sortConfig} onSort={requestSort} />
+              <SortableHeader label="Requested Pickup" sortKey="requestedPickupTime" currentSort={sortConfig} onSort={requestSort} />
               <SortableHeader label="Pickup Time" sortKey="pickupTime" currentSort={sortConfig} onSort={requestSort} />
               <SortableHeader label="Planned Drop" sortKey="plannedDrop" currentSort={sortConfig} onSort={requestSort} />
               <SortableHeader label="Actual Drop" sortKey="actualDrop" currentSort={sortConfig} onSort={requestSort} />
-              <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider">Action</th>
+              <th className="px-4 py-3 text-right text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                Action
+              </th>
             </tr>
           </thead>
 
           {/* Table Body */}
-          <tbody className="divide-y divide-slate-100 bg-white">
+          <tbody className="divide-y divide-slate-100 bg-white text-sm">
             {paginatedItems.map((booking) => (
               <tr 
                 key={`${booking.id}-${booking.status}-${booking.requestedPickupTime}`} 
-                className="hover:bg-slate-50/80 transition-colors duration-150 group"
+                className="hover:bg-slate-50/70 transition-colors"
               >
                 {/* Booking ID */}
-                <td className="px-5 py-4 whitespace-nowrap font-mono text-xs font-bold text-slate-800">
-                  #{booking.id}
+                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs font-semibold text-slate-700">
+                  {booking.id}
                 </td>
 
-                {/* Employee Name */}
-                <td className="px-5 py-4 whitespace-nowrap text-slate-900 font-semibold text-sm">
+                {/* Employee */}
+                <td className="px-4 py-3.5 whitespace-nowrap font-medium text-slate-900">
                   {booking.employeeName}
                 </td>
 
-                {/* Status Pill Badge */}
-                <td className="px-5 py-4 whitespace-nowrap">
+                {/* Status */}
+                <td className="px-4 py-3.5 whitespace-nowrap">
                   <StatusBadge status={booking.status} />
                 </td>
 
-                {/* From Location */}
-                <td className="px-5 py-4 whitespace-nowrap text-slate-700 font-medium">
+                {/* From */}
+                <td className="px-4 py-3.5 whitespace-nowrap text-slate-600">
                   {booking.from}
                 </td>
 
-                {/* To Location */}
-                <td className="px-5 py-4 whitespace-nowrap text-slate-700 font-medium">
+                {/* To */}
+                <td className="px-4 py-3.5 whitespace-nowrap text-slate-600">
                   {booking.to}
                 </td>
 
-                {/* Vehicle Badge */}
-                <td className="px-5 py-4 whitespace-nowrap">
-                  {booking.vehicle ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200/80 font-mono text-xs font-bold text-slate-700">
-                      {booking.vehicle}
-                    </span>
-                  ) : (
-                    <span className="text-slate-400 font-mono text-xs">-</span>
-                  )}
+                {/* Vehicle */}
+                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-600">
+                  {booking.vehicle || '—'}
                 </td>
 
-                {/* Requested Pickup Time */}
-                <td className="px-5 py-4 whitespace-nowrap font-mono text-xs font-bold text-slate-800">
+                {/* Requested Pickup */}
+                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-700 font-medium">
                   {booking.requestedPickupTime}
                 </td>
 
                 {/* Pickup Time */}
-                <td className="px-5 py-4 whitespace-nowrap font-mono text-xs text-slate-500">
-                  {booking.pickupTime || '-'}
+                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-500">
+                  {booking.pickupTime || '—'}
                 </td>
 
                 {/* Planned Drop */}
-                <td className="px-5 py-4 whitespace-nowrap font-mono text-xs text-slate-500">
-                  {booking.plannedDrop || '-'}
+                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-500">
+                  {booking.plannedDrop || '—'}
                 </td>
 
                 {/* Actual Drop */}
-                <td className="px-5 py-4 whitespace-nowrap font-mono text-xs text-slate-500">
-                  {booking.actualDrop || '-'}
+                <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs text-slate-500">
+                  {booking.actualDrop || '—'}
                 </td>
 
-                {/* Action Button matching MoveInSync "View" */}
-                <td className="px-6 py-4 whitespace-nowrap text-right">
+                {/* Action */}
+                <td className="px-4 py-3.5 whitespace-nowrap text-right">
                   <button
                     type="button"
                     onClick={() => dispatch({ type: 'SELECT_BOOKING', payload: booking })}
-                    className="inline-flex items-center justify-center px-4 py-1.5 text-xs font-bold text-[#183a7b] border border-[#183a7b] rounded-lg bg-blue-50/30 hover:bg-[#183a7b] hover:text-white transition-all duration-150 shadow-2xs cursor-pointer active:scale-95"
+                    className="px-3 py-1 text-xs font-medium rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 transition-colors shadow-2xs"
                   >
                     View
                   </button>
@@ -128,7 +124,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
             {paginatedItems.length === 0 && (
               <tr>
-                <td colSpan={11} className="px-6 py-16 text-center text-slate-400 text-sm">
+                <td colSpan={11} className="px-4 py-16 text-center text-slate-400 text-sm">
                   No bookings found matching current filters.
                 </td>
               </tr>
@@ -138,15 +134,13 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       </div>
 
       {/* Pagination Footer */}
-      <div className="mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          pageSize={pageSize}
-          onPageChange={goToPage}
-        />
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        onPageChange={goToPage}
+      />
     </div>
   );
 };

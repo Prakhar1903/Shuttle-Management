@@ -10,7 +10,8 @@ export interface PaginationProps {
 }
 
 /**
- * Pagination component for data tables.
+ * Enterprise Table Pagination Footer
+ * Responsive, aligned, and clean page control.
  */
 export const Pagination: React.FC<PaginationProps> = ({
   currentPage,
@@ -19,7 +20,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   pageSize,
   onPageChange,
 }) => {
-  const start = (currentPage - 1) * pageSize + 1;
+  const start = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalItems);
 
   const renderPageNumbers = () => {
@@ -43,19 +44,20 @@ export const Pagination: React.FC<PaginationProps> = ({
     return pages.map((page, index) => {
       if (page === '...') {
         return (
-          <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-500">
-            <MoreHorizontal className="h-4 w-4" />
+          <span key={`ellipsis-${index}`} className="px-2 py-1 text-slate-400">
+            <MoreHorizontal className="h-3.5 w-3.5" />
           </span>
         );
       }
       return (
         <button
           key={`page-${page}`}
+          type="button"
           onClick={() => onPageChange(page as number)}
-          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+          className={`min-w-[32px] h-8 px-2 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
             currentPage === page
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-700 hover:bg-gray-100'
+              ? 'bg-[#183a7b] text-white shadow-2xs'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
           {page}
@@ -67,33 +69,42 @@ export const Pagination: React.FC<PaginationProps> = ({
   if (totalItems === 0) return null;
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-white border-t sm:px-6">
-      <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-gray-700">
-            Showing <span className="font-medium">{start}</span> to{' '}
-            <span className="font-medium">{end}</span> of{' '}
-            <span className="font-medium">{totalItems}</span> Items
-          </p>
-        </div>
-        <div className="flex items-center space-x-1">
-          <button
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="p-1 rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/50 border-t border-slate-200/80">
+      {/* Item Range */}
+      <p className="text-xs text-slate-500 font-medium">
+        Showing <span className="font-semibold text-slate-800">{start}</span> to{' '}
+        <span className="font-semibold text-slate-800">{end}</span> of{' '}
+        <span className="font-semibold text-slate-800">{totalItems}</span> items
+      </p>
+
+      {/* Page Navigation Controls */}
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="h-8 px-2.5 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-200/80 bg-white shadow-2xs flex items-center gap-1"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Prev</span>
+        </button>
+
+        <div className="flex items-center gap-1 px-1">
           {renderPageNumbers()}
-          <button
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="p-1 rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
         </div>
+
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="h-8 px-2.5 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-200/80 bg-white shadow-2xs flex items-center gap-1"
+        >
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
   );
 };
+
+export default Pagination;
