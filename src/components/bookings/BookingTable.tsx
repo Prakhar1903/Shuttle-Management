@@ -57,7 +57,8 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             {paginatedItems.map((booking) => (
               <tr 
                 key={`${booking.id}-${booking.status}-${booking.requestedPickupTime}`} 
-                className="hover:bg-slate-50/70 transition-colors"
+                onClick={() => dispatch({ type: 'SELECT_BOOKING', payload: booking })}
+                className="hover:bg-blue-50/40 transition-colors cursor-pointer"
               >
                 {/* Booking ID */}
                 <td className="px-3.5 py-3 whitespace-nowrap text-xs font-medium text-slate-800">

@@ -1,6 +1,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, ShieldCheck, GraduationCap } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
+import toast from 'react-hot-toast';
 
 /**
  * Top Application Header (64px)
@@ -157,6 +158,7 @@ const Header = () => {
               if (location.pathname === '/student') {
                 navigate('/management');
               }
+              toast.success('🛡️ Switched to Transport Lead (Admin Portal)');
             }}
             className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
               role === 'admin'
@@ -176,6 +178,7 @@ const Header = () => {
             onClick={() => {
               setRole('student');
               navigate('/student');
+              toast.success('👋 Switched to Student Commuter (Alex Rivera)');
             }}
             className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
               role === 'student'
@@ -210,18 +213,36 @@ const Header = () => {
           {/* Divider */}
           <div className="h-5 w-px bg-slate-300"></div>
 
-          {/* User Profile */}
-          <div className="flex items-center gap-2.5 pl-1">
+          {/* User Profile / Quick Switcher */}
+          <button
+            type="button"
+            onClick={() => {
+              if (role === 'admin') {
+                setRole('student');
+                navigate('/student');
+                toast.success('👋 Switched to Student / Rider Mode (Alex Rivera)');
+              } else {
+                setRole('admin');
+                navigate('/management');
+                toast.success('🛡️ Switched to Admin Operations Mode');
+              }
+            }}
+            className="flex items-center gap-2.5 pl-1 hover:opacity-85 transition-opacity cursor-pointer text-left focus:outline-none"
+            title="Click to Switch Portal Role"
+          >
             <div className={`w-8 h-8 rounded-full text-white font-bold text-xs flex items-center justify-center shadow-xs ${
               role === 'student' ? 'bg-[#1e40af]' : 'bg-slate-900'
             }`}>
               {currentUser.avatar}
             </div>
             <div className="hidden sm:block text-left">
-              <div className="text-xs font-bold text-slate-900 leading-tight">{currentUser.name}</div>
+              <div className="text-xs font-bold text-slate-900 leading-tight flex items-center gap-1">
+                <span>{currentUser.name}</span>
+                <span className="text-[10px] text-blue-700 underline font-normal">(switch)</span>
+              </div>
               <div className="text-[11px] text-slate-600 leading-tight">{currentUser.role}</div>
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </header>

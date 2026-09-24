@@ -102,14 +102,24 @@ function bookingReducer(state: BookingState, action: Action): BookingState {
     case 'UPDATE_BOOKING': {
       const newBookings = state.bookings.map(b => b.id === action.payload.id ? action.payload : b);
       const newFiltered = state.filteredBookings.map(b => b.id === action.payload.id ? action.payload : b);
-      return { ...state, bookings: newBookings, filteredBookings: newFiltered };
+      const updatedSelected = state.selectedBooking?.id === action.payload.id ? action.payload : state.selectedBooking;
+      return { 
+        ...state, 
+        bookings: newBookings, 
+        filteredBookings: newFiltered,
+        selectedBooking: updatedSelected 
+      };
     }
     case 'CANCEL_BOOKING': {
       const updateFn = (b: Booking) => b.id === action.payload ? { ...b, status: 'Cancelled' as any } : b;
+      const updatedSelected = state.selectedBooking?.id === action.payload 
+        ? { ...state.selectedBooking, status: 'Cancelled' as any } 
+        : state.selectedBooking;
       return { 
         ...state, 
         bookings: state.bookings.map(updateFn), 
-        filteredBookings: state.filteredBookings.map(updateFn) 
+        filteredBookings: state.filteredBookings.map(updateFn),
+        selectedBooking: updatedSelected
       };
     }
     case 'SET_BOOKINGS':

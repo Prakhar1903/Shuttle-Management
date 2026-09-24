@@ -43,16 +43,34 @@ function driverReducer(state: DriverState, action: Action): DriverState {
     case 'SELECT_DRIVER':
       return { ...state, selectedDriver: action.payload };
     case 'START_DUTY': {
-      const updateDriver = (d: Driver) => {
+      const updateDriver = (d: Driver): Driver => {
         if (d.id === action.payload.driverId) {
+          const [h, m] = action.payload.time.split(':').map(Number);
+          const endMins = (h * 60 + m) + 30; // 30 min initial duty segment
+          const endH = Math.min(22, Math.floor(endMins / 60));
+          const endM = endMins % 60;
+          const endTime = `${endH.toString().padStart(2, '0')}:${endM.toString().padStart(2, '0')}`;
+
           const newEvent: ScheduleEvent = {
-            id: `event-${Date.now()}`,
+            id: `event-duty-start-${Date.now()}`,
             type: 'duty-start',
             startTime: action.payload.time,
-            endTime: action.payload.time,
+            endTime: endTime,
             label: 'Duty Start'
           };
-          return { ...d, schedule: [...d.schedule, newEvent] };
+          
+          // Filter out duplicate duty-starts at same time and sort chronologically
+          const updatedSchedule = [...d.schedule, newEvent].sort((a, b) => {
+            const [aH, aM] = a.startTime.split(':').map(Number);
+            const [bH, bM] = b.startTime.split(':').map(Number);
+            return (aH * 60 + aM) - (bH * 60 + bM);
+          });
+
+          return { 
+            ...d, 
+            status: 'Online', 
+            schedule: updatedSchedule 
+          };
         }
         return d;
       };
@@ -63,16 +81,33 @@ function driverReducer(state: DriverState, action: Action): DriverState {
       };
     }
     case 'END_DUTY': {
-      const updateDriver = (d: Driver) => {
+      const updateDriver = (d: Driver): Driver => {
         if (d.id === action.payload.driverId) {
+          const [h, m] = action.payload.time.split(':').map(Number);
+          const endMins = (h * 60 + m) + 30;
+          const endH = Math.min(22, Math.floor(endMins / 60));
+          const endM = endMins % 60;
+          const endTime = `${endH.toString().padStart(2, '0')}:${endM.toString().padStart(2, '0')}`;
+
           const newEvent: ScheduleEvent = {
-            id: `event-${Date.now()}`,
+            id: `event-duty-end-${Date.now()}`,
             type: 'duty-end',
             startTime: action.payload.time,
-            endTime: action.payload.time,
+            endTime: endTime,
             label: 'Duty End'
           };
-          return { ...d, schedule: [...d.schedule, newEvent] };
+
+          const updatedSchedule = [...d.schedule, newEvent].sort((a, b) => {
+            const [aH, aM] = a.startTime.split(':').map(Number);
+            const [bH, bM] = b.startTime.split(':').map(Number);
+            return (aH * 60 + aM) - (bH * 60 + bM);
+          });
+
+          return { 
+            ...d, 
+            status: 'Offline', 
+            schedule: updatedSchedule 
+          };
         }
         return d;
       };
@@ -83,16 +118,26 @@ function driverReducer(state: DriverState, action: Action): DriverState {
       };
     }
     case 'ADD_BREAK': {
-      const updateDriver = (d: Driver) => {
+      const updateDriver = (d: Driver): Driver => {
         if (d.id === action.payload.driverId) {
           const newEvent: ScheduleEvent = {
-            id: `event-${Date.now()}`,
+            id: `event-break-${Date.now()}`,
             type: 'break',
             startTime: action.payload.startTime,
             endTime: action.payload.endTime,
             label: 'Break'
           };
-          return { ...d, schedule: [...d.schedule, newEvent] };
+
+          const updatedSchedule = [...d.schedule, newEvent].sort((a, b) => {
+            const [aH, aM] = a.startTime.split(':').map(Number);
+            const [bH, bM] = b.startTime.split(':').map(Number);
+            return (aH * 60 + aM) - (bH * 60 + bM);
+          });
+
+          return { 
+            ...d, 
+            schedule: updatedSchedule 
+          };
         }
         return d;
       };

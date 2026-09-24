@@ -20,7 +20,7 @@ export const BookingDetailPanel: React.FC = () => {
   const { state, dispatch } = useBookings();
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const booking = state.selectedBooking;
+  const booking = state.bookings.find(b => b.id === state.selectedBooking?.id) || state.selectedBooking;
 
   if (!state.isDetailPanelOpen || !booking) {
     return null;
@@ -38,7 +38,19 @@ export const BookingDetailPanel: React.FC = () => {
   };
 
   const handleSignIn = () => {
-    toast.success(`Rider ${booking.employeeName} signed in`);
+    dispatch({
+      type: 'UPDATE_BOOKING',
+      payload: { ...booking, status: 'On Going' }
+    });
+    toast.success(`✅ Rider ${booking.employeeName} signed in! Status updated to On Going.`);
+  };
+
+  const handleCompleteRide = () => {
+    dispatch({
+      type: 'UPDATE_BOOKING',
+      payload: { ...booking, status: 'Completed' }
+    });
+    toast.success(`🏁 Ride #${booking.id} marked as Completed.`);
   };
 
   const handleNoShow = () => {
@@ -96,7 +108,7 @@ export const BookingDetailPanel: React.FC = () => {
 
             {/* Sign In & Date line */}
             <div className="flex items-center justify-between text-xs text-slate-500 mt-3 pt-1">
-              <span>Sign In: <span className="text-slate-700">{booking.status === 'On Going' || booking.status === 'Completed' || booking.status === 'Dropped' ? 'Signed In' : '-'}</span></span>
+              <span>Sign In: <span className={booking.status === 'On Going' || booking.status === 'Completed' || booking.status === 'Dropped' ? 'font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 ml-1' : 'text-slate-700 ml-1'}>{booking.status === 'On Going' || booking.status === 'Completed' || booking.status === 'Dropped' ? 'Signed In (On Board)' : '-'}</span></span>
               <span>
                 {booking.date 
                   ? new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
@@ -202,23 +214,45 @@ export const BookingDetailPanel: React.FC = () => {
 
           {/* Quick Action Links matching reference */}
           <div className="space-y-3 pt-2">
-            <button
-              type="button"
-              onClick={handleSignIn}
-              className="flex items-center gap-2 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
-            >
-              <ArrowRight className="w-4 h-4 text-blue-600" />
-              <span>Sign in rider</span>
-            </button>
+            {booking.status === 'On Going' ? (
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Rider Signed In (On Going)</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCompleteRide}
+                  className="text-xs font-bold text-blue-700 hover:text-blue-900 cursor-pointer underline underline-offset-2"
+                >
+                  Mark as Dropped / Complete
+                </button>
+              </div>
+            ) : booking.status === 'Completed' || booking.status === 'Dropped' ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">
+                <span>Trip Completed</span>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSignIn}
+                className="flex items-center gap-2 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
+              >
+                <ArrowRight className="w-4 h-4 text-blue-600" />
+                <span>Sign in rider</span>
+              </button>
+            )}
 
-            <button
-              type="button"
-              onClick={handleNoShow}
-              className="flex items-center gap-2 text-xs font-semibold text-rose-600 hover:text-rose-800 cursor-pointer transition-colors"
-            >
-              <Ban className="w-4 h-4 text-rose-600" />
-              <span>Mark rider as No-show</span>
-            </button>
+            {booking.status !== 'No Show' && booking.status !== 'Completed' && (
+              <button
+                type="button"
+                onClick={handleNoShow}
+                className="flex items-center gap-2 text-xs font-semibold text-rose-600 hover:text-rose-800 cursor-pointer transition-colors"
+              >
+                <Ban className="w-4 h-4 text-rose-600" />
+                <span>Mark rider as No-show</span>
+              </button>
+            )}
           </div>
         </div>
 

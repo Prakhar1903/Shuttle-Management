@@ -35,7 +35,7 @@ export const DriverList: React.FC<DriverListProps> = ({
 
 
   return (
-    <div className="flex flex-col divide-y divide-slate-100">
+    <div className="flex flex-col divide-y divide-slate-100 overflow-visible">
       {drivers.map(driver => (
         <div 
           key={driver.id}
@@ -44,7 +44,7 @@ export const DriverList: React.FC<DriverListProps> = ({
             selectedDriverId === driver.id 
               ? 'bg-blue-50/60' 
               : 'hover:bg-slate-50/60'
-          }`}
+          } ${menuOpenId === driver.id ? 'z-40' : 'z-10'}`}
         >
           {/* Driver Name & Status Badge */}
           <div className="min-w-0 pr-2">

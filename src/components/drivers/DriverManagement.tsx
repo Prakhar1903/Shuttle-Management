@@ -42,7 +42,7 @@ export const DriverManagement: React.FC = () => {
       </div>
 
       {/* Main Scheduling Grid: Synchronized Canvas */}
-      <div className="scheduler-grid rounded-[10px] border border-[#dedfe3] overflow-hidden flex bg-white">
+      <div className="scheduler-grid rounded-[10px] border border-[#dedfe3] flex bg-white relative">
         {/* Left Column: Search & Driver Names (w-[210px] fixed matching reference) */}
         <div className="w-[239px] shrink-0 border-r border-[#e0e2e6] bg-white flex flex-col">
           {/* Top Left Header Cell matching reference */}

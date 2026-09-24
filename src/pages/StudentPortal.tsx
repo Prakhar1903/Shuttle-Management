@@ -119,6 +119,39 @@ export const StudentPortal: React.FC = () => {
     toast.success(`🎉 Shuttle ride #${newBookingId} requested successfully! Transport dispatch notified.`);
   };
 
+  const handleStudentSignIn = (rideId: string) => {
+    const existing = state.bookings.find(b => b.id === rideId);
+    if (existing) {
+      dispatch({
+        type: 'UPDATE_BOOKING',
+        payload: { ...existing, status: 'On Going' }
+      });
+    } else {
+      dispatch({
+        type: 'ADD_BOOKING',
+        payload: { ...activeRide, status: 'On Going' }
+      });
+    }
+    toast.success(`🎟️ Boarding pass verified! You are signed in and boarded on ${activeRide.vehicle || 'NB-002-RF'}.`);
+  };
+
+  const handleStudentCompleteRide = (rideId: string) => {
+    const existing = state.bookings.find(b => b.id === rideId);
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (existing) {
+      dispatch({
+        type: 'UPDATE_BOOKING',
+        payload: { ...existing, status: 'Completed', actualDrop: nowTime }
+      });
+    } else {
+      dispatch({
+        type: 'ADD_BOOKING',
+        payload: { ...activeRide, status: 'Completed', actualDrop: nowTime }
+      });
+    }
+    toast.success(`🏁 Ride completed! Thank you for commuting with MoveInSync.`);
+  };
+
   const handleCancelBooking = (bookingId: string) => {
     dispatch({ type: 'CANCEL_BOOKING', payload: bookingId });
     toast.success('Your shuttle ride has been cancelled.');
@@ -385,15 +418,47 @@ export const StudentPortal: React.FC = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-2 flex items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => setConfirmCancelId(activeRide.id)}
-                className="w-full py-2 px-3 rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-rose-600 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
-              >
-                <Ban size={13} />
-                <span>Cancel Shuttle Ride</span>
-              </button>
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+              {activeRide.status === 'On Going' ? (
+                <>
+                  <div className="w-full sm:flex-1 py-2 px-3 rounded-xl bg-emerald-100/80 border border-emerald-300 text-emerald-800 font-bold text-xs flex items-center justify-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Boarded & In Transit</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleStudentCompleteRide(activeRide.id)}
+                    className="w-full sm:w-auto py-2 px-4 rounded-xl bg-[#102d69] hover:bg-[#0c2352] text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                  >
+                    <CheckCircle2 size={14} />
+                    <span>Complete Ride</span>
+                  </button>
+                </>
+              ) : activeRide.status === 'Completed' ? (
+                <div className="w-full py-2.5 px-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center gap-2">
+                  <CheckCircle2 size={14} className="text-emerald-600" />
+                  <span>Trip Completed • Ready for Next Ride</span>
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleStudentSignIn(activeRide.id)}
+                    className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                  >
+                    <QrCode size={14} />
+                    <span>Sign In & Board Shuttle</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmCancelId(activeRide.id)}
+                    className="w-full sm:w-auto py-2.5 px-3.5 rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-rose-600 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                  >
+                    <Ban size={13} />
+                    <span>Cancel</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
