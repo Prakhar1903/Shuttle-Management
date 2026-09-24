@@ -144,6 +144,8 @@ const generateRandomBookings = (): Booking[] => {
 };
 
 export const mockBookings: Booking[] = [
+  { id: '892104', employeeName: 'Alex Rivera', employeeId: 'EMP2042', status: 'Accepted', from: 'Hostel A', to: 'Library', vehicle: 'NB-002-RF', requestedPickupTime: '12:15', pickupTime: null, plannedDrop: '12:35', actualDrop: null, date: '2024-12-16' },
+  { id: '781920', employeeName: 'Alex Rivera', employeeId: 'EMP2042', status: 'Completed', from: 'Sports Complex', to: 'Hostel A', vehicle: 'NB-005-BL', requestedPickupTime: '09:00', pickupTime: '09:05', plannedDrop: '09:25', actualDrop: '09:22', date: '2024-12-16' },
   { id: '123123', employeeName: 'Thompson', employeeId: 'EMP1001', status: 'Accepted', from: 'Library', to: 'Data Centre', vehicle: 'NB-002-RF', requestedPickupTime: '11:21', pickupTime: null, plannedDrop: '11:32', actualDrop: '11:32', date: '2024-12-16' },
   { id: '324235', employeeName: 'Daniel Radcliff', employeeId: 'EMP1002', status: 'Waiting', from: 'Library', to: 'Parking', vehicle: 'NB-002-RF', requestedPickupTime: '11:34', pickupTime: null, plannedDrop: '11:43', actualDrop: '11:43', date: '2024-12-16' },
   { id: '545232', employeeName: 'W.J. Smith', employeeId: 'EMP1003', status: 'No Show', from: 'Data Centre', to: 'Parking', vehicle: 'NB-002-RF', requestedPickupTime: '11:50', pickupTime: null, plannedDrop: '12:10', actualDrop: null, date: '2024-12-16' },

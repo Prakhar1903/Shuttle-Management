@@ -13,7 +13,9 @@ import {
   ArrowRight, 
   Ban, 
   Sparkles, 
-  PhoneCall
+  PhoneCall,
+  Ticket,
+  AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Booking } from '../types';
@@ -49,30 +51,12 @@ export const StudentPortal: React.FC = () => {
            b.employeeId === currentUser.id
   );
 
-  // Find active / upcoming ride
+  // Find active / upcoming ride strictly from state
   const activeRide = studentBookings.find(
     (b) => ['Accepted', 'Waiting', 'On Going', 'Requested'].includes(b.status)
-  ) || {
-    // If no active ride yet, provide default preview ride for the student
-    id: '892104',
-    employeeName: currentUser.name,
-    employeeId: currentUser.id,
-    status: 'Accepted' as const,
-    from: 'Hostel A',
-    to: 'Academic Block',
-    vehicle: 'NB-002-RF',
-    vehiclePlate: 'UA3282',
-    vehicleType: 'White Bus',
-    vehicleCapacity: 12,
-    requestedPickupTime: '12:15',
-    pickupTime: null,
-    plannedDrop: '12:35',
-    actualDrop: null,
-    date: '2024-12-16',
-    driverName: 'Samuel Jones',
-    driverPhone: '555-0101',
-    driverRating: 4.8
-  };
+  );
+  const hasActiveRide = !!activeRide;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pastTrips = studentBookings.filter(
     (b) => ['Completed', 'Dropped', 'Cancelled', 'No Show'].includes(b.status)
@@ -81,10 +65,18 @@ export const StudentPortal: React.FC = () => {
   const handleBookRide = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (hasActiveRide) {
+      toast.error(`⚠️ You already have an active shuttle booking (#${activeRide.id}). Please complete or cancel it first.`);
+      return;
+    }
+
     if (fromStop === toStop) {
       toast.error('Origin and destination stops cannot be the same!');
       return;
     }
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     const [h, m] = pickupTime.split(':').map(Number);
     const dropTotalMins = h * 60 + m + 20; // 20 min transit
@@ -117,6 +109,7 @@ export const StudentPortal: React.FC = () => {
 
     dispatch({ type: 'ADD_BOOKING', payload: newBooking });
     toast.success(`🎉 Shuttle ride #${newBookingId} requested successfully! Transport dispatch notified.`);
+    setTimeout(() => setIsSubmitting(false), 500);
   };
 
   const handleStudentSignIn = (rideId: string) => {
@@ -126,13 +119,8 @@ export const StudentPortal: React.FC = () => {
         type: 'UPDATE_BOOKING',
         payload: { ...existing, status: 'On Going' }
       });
-    } else {
-      dispatch({
-        type: 'ADD_BOOKING',
-        payload: { ...activeRide, status: 'On Going' }
-      });
+      toast.success(`🎟️ Boarding pass verified! You are signed in and boarded on ${existing.vehicle || 'NB-002-RF'}.`);
     }
-    toast.success(`🎟️ Boarding pass verified! You are signed in and boarded on ${activeRide.vehicle || 'NB-002-RF'}.`);
   };
 
   const handleStudentCompleteRide = (rideId: string) => {
@@ -143,18 +131,13 @@ export const StudentPortal: React.FC = () => {
         type: 'UPDATE_BOOKING',
         payload: { ...existing, status: 'Completed', actualDrop: nowTime }
       });
-    } else {
-      dispatch({
-        type: 'ADD_BOOKING',
-        payload: { ...activeRide, status: 'Completed', actualDrop: nowTime }
-      });
+      toast.success(`🏁 Ride completed! Thank you for commuting with MoveInSync.`);
     }
-    toast.success(`🏁 Ride completed! Thank you for commuting with MoveInSync.`);
   };
 
   const handleCancelBooking = (bookingId: string) => {
     dispatch({ type: 'CANCEL_BOOKING', payload: bookingId });
-    toast.success('Your shuttle ride has been cancelled.');
+    toast.success(`✅ Shuttle ride #${bookingId} has been cancelled.`);
     setConfirmCancelId(null);
   };
 
@@ -319,6 +302,25 @@ export const StudentPortal: React.FC = () => {
               ))}
             </div>
 
+            {/* Active Ride Alert Banner */}
+            {hasActiveRide && (
+              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <AlertCircle size={16} className="text-amber-600 shrink-0" />
+                  <span>
+                    You already have active ride <strong>#{activeRide.id}</strong> ({activeRide.from} → {activeRide.to}). Cancel or complete it before booking another.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setConfirmCancelId(activeRide.id)}
+                  className="px-3 py-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded-lg font-bold text-xs shrink-0 cursor-pointer transition-colors shadow-2xs"
+                >
+                  Cancel Active Ride
+                </button>
+              </div>
+            )}
+
             {/* Passenger Note & Submit Button */}
             <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
@@ -328,9 +330,14 @@ export const StudentPortal: React.FC = () => {
 
               <button
                 type="submit"
-                className="h-11 px-6 bg-[#102d69] hover:bg-[#0c2352] text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                disabled={hasActiveRide || isSubmitting}
+                className={`h-11 px-6 rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 ${
+                  hasActiveRide
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
+                    : 'bg-[#102d69] hover:bg-[#0c2352] text-white cursor-pointer active:scale-[0.98]'
+                }`}
               >
-                <span>Confirm Shuttle Booking</span>
+                <span>{hasActiveRide ? 'Active Pass In Progress' : isSubmitting ? 'Requesting...' : 'Confirm Shuttle Booking'}</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -347,120 +354,147 @@ export const StudentPortal: React.FC = () => {
               </h2>
               <p className="text-[11px] text-slate-500">Live boarding pass for campus transit</p>
             </div>
-            <StatusBadge status={activeRide.status} />
+            {activeRide ? (
+              <StatusBadge status={activeRide.status} />
+            ) : (
+              <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                No Active Pass
+              </span>
+            )}
           </div>
 
-          {/* Digital Boarding Pass Card */}
-          <div className="rounded-2xl border border-blue-200/80 bg-gradient-to-b from-blue-50/70 to-slate-50/90 p-5 space-y-4 shadow-2xs relative">
-            {/* Header / Ticket Code */}
-            <div className="flex items-center justify-between pb-3 border-b border-blue-100">
-              <div>
-                <span className="text-[10px] uppercase tracking-wider font-extrabold text-blue-600">Shuttle Pass ID</span>
-                <div className="text-lg font-mono font-bold text-slate-900 leading-tight">#{activeRide.id}</div>
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Scheduled Date</span>
-                <div className="text-xs font-semibold text-slate-700">{activeRide.date}</div>
-              </div>
-            </div>
-
-            {/* Route Timeline Diagram */}
-            <div className="space-y-3 py-1">
-              <div className="flex items-start gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1 shrink-0 ring-4 ring-emerald-100" />
-                <div className="flex-1">
-                  <div className="text-[11px] text-slate-500 font-semibold uppercase">Pickup Station</div>
-                  <div className="font-bold text-sm text-slate-900">{activeRide.from}</div>
-                  <div className="text-[11px] text-slate-600 font-mono mt-0.5 flex items-center gap-1">
-                    <Clock size={12} className="text-slate-400" /> {activeRide.requestedPickupTime}
-                  </div>
-                </div>
-              </div>
-
-              {/* Connecting line */}
-              <div className="ml-1 -my-2 h-4 w-0.5 bg-slate-300 border-l border-dashed border-slate-400" />
-
-              <div className="flex items-start gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-rose-500 mt-1 shrink-0 ring-4 ring-rose-100" />
-                <div className="flex-1">
-                  <div className="text-[11px] text-slate-500 font-semibold uppercase">Drop Destination</div>
-                  <div className="font-bold text-sm text-slate-900">{activeRide.to}</div>
-                  <div className="text-[11px] text-slate-600 font-mono mt-0.5 flex items-center gap-1">
-                    <Clock size={12} className="text-slate-400" /> Planned: {activeRide.plannedDrop || '12:35'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Vehicle & Driver Details */}
-            <div className="pt-3 border-t border-blue-100/80 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <Bus size={18} className="text-[#102d69]" />
-                </div>
+          {activeRide ? (
+            /* Digital Boarding Pass Card */
+            <div className="rounded-2xl border border-blue-200/80 bg-gradient-to-b from-blue-50/70 to-slate-50/90 p-5 space-y-4 shadow-2xs relative">
+              {/* Header / Ticket Code */}
+              <div className="flex items-center justify-between pb-3 border-b border-blue-100">
                 <div>
-                  <div className="font-bold text-slate-900 leading-tight">{activeRide.vehicle || 'NB-002-RF'}</div>
-                  <div className="text-[11px] text-slate-500">{activeRide.vehiclePlate || 'UA3282'} • {activeRide.vehicleType || 'White Bus'}</div>
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold text-blue-600">Shuttle Pass ID</span>
+                  <div className="text-lg font-mono font-bold text-slate-900 leading-tight">#{activeRide.id}</div>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Scheduled Date</span>
+                  <div className="text-xs font-semibold text-slate-700">{activeRide.date}</div>
                 </div>
               </div>
 
-              {/* Driver info */}
-              <div className="text-right">
-                <div className="font-bold text-slate-900 flex items-center justify-end gap-1">
-                  <span>{activeRide.driverName || 'Samuel Jones'}</span>
-                  <Star size={12} className="text-amber-500 fill-amber-500" />
-                </div>
-                <div className="text-[11px] text-slate-500 font-mono flex items-center justify-end gap-1 mt-0.5">
-                  <PhoneCall size={10} className="text-slate-400" />
-                  <span>{activeRide.driverPhone || '555-0101'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-              {activeRide.status === 'On Going' ? (
-                <>
-                  <div className="w-full sm:flex-1 py-2 px-3 rounded-xl bg-emerald-100/80 border border-emerald-300 text-emerald-800 font-bold text-xs flex items-center justify-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Boarded & In Transit</span>
+              {/* Route Timeline Diagram */}
+              <div className="space-y-3 py-1">
+                <div className="flex items-start gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1 shrink-0 ring-4 ring-emerald-100" />
+                  <div className="flex-1">
+                    <div className="text-[11px] text-slate-500 font-semibold uppercase">Pickup Station</div>
+                    <div className="font-bold text-sm text-slate-900">{activeRide.from}</div>
+                    <div className="text-[11px] text-slate-600 font-mono mt-0.5 flex items-center gap-1">
+                      <Clock size={12} className="text-slate-400" /> {activeRide.requestedPickupTime}
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleStudentCompleteRide(activeRide.id)}
-                    className="w-full sm:w-auto py-2 px-4 rounded-xl bg-[#102d69] hover:bg-[#0c2352] text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                  >
-                    <CheckCircle2 size={14} />
-                    <span>Complete Ride</span>
-                  </button>
-                </>
-              ) : activeRide.status === 'Completed' ? (
-                <div className="w-full py-2.5 px-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center gap-2">
-                  <CheckCircle2 size={14} className="text-emerald-600" />
-                  <span>Trip Completed • Ready for Next Ride</span>
                 </div>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => handleStudentSignIn(activeRide.id)}
-                    className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
-                  >
-                    <QrCode size={14} />
-                    <span>Sign In & Board Shuttle</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmCancelId(activeRide.id)}
-                    className="w-full sm:w-auto py-2.5 px-3.5 rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-rose-600 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
-                  >
-                    <Ban size={13} />
-                    <span>Cancel</span>
-                  </button>
-                </>
-              )}
+
+                {/* Connecting line */}
+                <div className="ml-1 -my-2 h-4 w-0.5 bg-slate-300 border-l border-dashed border-slate-400" />
+
+                <div className="flex items-start gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500 mt-1 shrink-0 ring-4 ring-rose-100" />
+                  <div className="flex-1">
+                    <div className="text-[11px] text-slate-500 font-semibold uppercase">Drop Destination</div>
+                    <div className="font-bold text-sm text-slate-900">{activeRide.to}</div>
+                    <div className="text-[11px] text-slate-600 font-mono mt-0.5 flex items-center gap-1">
+                      <Clock size={12} className="text-slate-400" /> Planned: {activeRide.plannedDrop || '12:35'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Vehicle & Driver Details */}
+              <div className="pt-3 border-t border-blue-100/80 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <Bus size={18} className="text-[#102d69]" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 leading-tight">{activeRide.vehicle || 'NB-002-RF'}</div>
+                    <div className="text-[11px] text-slate-500">{activeRide.vehiclePlate || 'UA3282'} • {activeRide.vehicleType || 'White Bus'}</div>
+                  </div>
+                </div>
+
+                {/* Driver info */}
+                <div className="text-right">
+                  <div className="font-bold text-slate-900 flex items-center justify-end gap-1">
+                    <span>{activeRide.driverName || 'Samuel Jones'}</span>
+                    <Star size={12} className="text-amber-500 fill-amber-500" />
+                  </div>
+                  <div className="text-[11px] text-slate-500 font-mono flex items-center justify-end gap-1 mt-0.5">
+                    <PhoneCall size={10} className="text-slate-400" />
+                    <span>{activeRide.driverPhone || '555-0101'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                {activeRide.status === 'On Going' ? (
+                  <>
+                    <div className="w-full sm:flex-1 py-2 px-3 rounded-xl bg-emerald-100/80 border border-emerald-300 text-emerald-800 font-bold text-xs flex items-center justify-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>Boarded & In Transit</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleStudentCompleteRide(activeRide.id)}
+                      className="w-full sm:w-auto py-2 px-4 rounded-xl bg-[#102d69] hover:bg-[#0c2352] text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <CheckCircle2 size={14} />
+                      <span>Complete Ride</span>
+                    </button>
+                  </>
+                ) : activeRide.status === 'Completed' ? (
+                  <div className="w-full py-2.5 px-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-600" />
+                    <span>Trip Completed • Ready for Next Ride</span>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleStudentSignIn(activeRide.id)}
+                      className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                    >
+                      <QrCode size={14} />
+                      <span>Sign In & Board Shuttle</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmCancelId(activeRide.id)}
+                      className="w-full sm:w-auto py-2.5 px-3.5 rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-rose-600 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                    >
+                      <Ban size={13} />
+                      <span>Cancel</span>
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Clean Empty State when no active pass exists or after cancel */
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 flex flex-col items-center justify-center text-center space-y-3.5 min-h-[350px]">
+              <div className="w-14 h-14 rounded-2xl bg-blue-100/70 border border-blue-200 flex items-center justify-center text-[#102d69] shadow-2xs">
+                <Ticket size={28} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-base text-slate-800">No Active Shuttle Pass</h3>
+                <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
+                  You don't have any active shuttle rides scheduled. Select your campus route and book your seat on the left.
+                </p>
+              </div>
+              <div className="pt-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Campus Transit Circuit Open</span>
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
